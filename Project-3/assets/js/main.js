@@ -103,7 +103,7 @@
   var groups = [
     ['section .eyebrow, section > .wrap > .body, .about-grid > div, .about-grid > figure', 0],
     ['.focus > div', 1], ['.grid > .project', 1], ['.timeline > .item', 1], ['.others', 0],
-    ['.skills-ui', 0], ['.langs > li', 1], ['.contact-list > li', 1], ['.stats', 0],
+    ['.skills-ui', 0], ['.cert-grid > .cert', 1], ['.langs > li', 1], ['.contact-list > li', 1], ['.stats', 0],
     ['.detail section, .detail .pager', 1]
   ];
   var els = [];
@@ -141,7 +141,7 @@
 
   // ---------- Survol : halo, inclinaison, boutons magnétiques ----------
   if (!reduce && fine) {
-    $$('.project, .skill-group').forEach(function (c) {
+    $$('.project, .skill-group, .cert').forEach(function (c) {
       c.addEventListener('pointermove', function (e) {
         var r = c.getBoundingClientRect(), px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
         c.style.setProperty('--mx', (e.clientX - r.left) + 'px');
@@ -264,7 +264,7 @@
       requestAnimationFrame(follow);
     }
     document.addEventListener('pointerover', function (e) {
-      ring.classList.toggle('big', !!e.target.closest('a, button, .project, .skill-group'));
+      ring.classList.toggle('big', !!e.target.closest('a, button, .project, .cert'));
     });
   }
 
@@ -310,8 +310,9 @@
       { g: 'Aller à', t: 'Projets', h: '§ 02', u: sec('projets') },
       { g: 'Aller à', t: 'Parcours', h: '§ 03', u: sec('parcours') },
       { g: 'Aller à', t: 'Compétences', h: '§ 04', u: sec('competences') },
-      { g: 'Aller à', t: 'Langues', h: '§ 05', u: sec('langues') },
-      { g: 'Aller à', t: 'Contact', h: '§ 06', u: sec('contact') },
+      { g: 'Aller à', t: 'Certifications', h: '§ 05', u: sec('certifications') },
+      { g: 'Aller à', t: 'Langues', h: '§ 06', u: sec('langues') },
+      { g: 'Aller à', t: 'Contact', h: '§ 07', u: sec('contact') },
       { g: 'Projets', t: 'Tous les projets', h: 'liste', u: pre + 'projets/index.html' },
       { g: 'Projets', t: 'Application Symfony conteneurisée', h: '2025', u: pre + 'projets/symfony-docker.html' },
       { g: 'Projets', t: 'Jeu web 2048', h: '2025', u: pre + 'projets/jeu-2048.html' },
@@ -433,6 +434,13 @@
     if (reduce || !('IntersectionObserver' in window)) ui.classList.add('manual');
     else new IntersectionObserver(function (en) { ui.classList.toggle('run', en[0].isIntersecting); }, { threshold: 0.35 }).observe(ui);
   })();
+
+  // ---------- Certifications : part de la validité écoulée ----------
+  $$('.validity').forEach(function (v) {
+    var a = new Date(v.getAttribute('data-from') + '-01'), b = new Date(v.getAttribute('data-to') + '-01');
+    var p = Math.max(0, Math.min(1, (Date.now() - a) / (b - a)));
+    v.style.setProperty('--p', (p * 100).toFixed(1) + '%');
+  });
 
   // ---------- Défilement : progression, section active, frise, parallaxe ----------
   var bar = document.querySelector('.progress');
