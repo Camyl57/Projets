@@ -70,8 +70,8 @@
 
   // ---------- Texte « brouillé » avant de se fixer ----------
   var chars = 'abcdefghijklmnopqrstuvwxyz0123456789#$%&/<>';
-  function scramble(el) {
-    var final = el.textContent, start = null, dur = 650;
+  function scramble(el, d) {
+    var final = el.textContent, start = null, dur = d || 650;
     if (reduce) return;
     function step(t) {
       if (!start) start = t;
@@ -279,6 +279,122 @@
       document.body.appendChild(cur);
       setTimeout(function () { cur.remove(); }, 2300);
     }
+  }
+
+  // ---------- Navigation rapide (Ctrl K / Cmd K) ----------
+  (function () {
+    var brand = document.querySelector('.brand');
+    if (!brand || !window.HTMLDialogElement) return;
+    var sub = (brand.getAttribute('href') || '').indexOf('../') === 0;
+    var pre = sub ? '../' : '';
+    var sec = function (id) { return sub ? '../index.html#' + id : '#' + id; };
+    var mail = 'camyl.khebache@gmail.com';
+
+    var toast = document.createElement('div');
+    toast.className = 'toast'; toast.setAttribute('role', 'status');
+    document.body.appendChild(toast);
+    var tt;
+    function say(msg) {
+      toast.textContent = msg; toast.classList.add('on');
+      clearTimeout(tt); tt = setTimeout(function () { toast.classList.remove('on'); }, 2200);
+    }
+    function go(url, blank) {
+      if (blank) { window.open(url, '_blank', 'noopener'); return; }
+      if (url.charAt(0) === '#') {
+        var t = document.querySelector(url);
+        if (t) { t.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' }); history.replaceState(null, '', url); }
+      } else window.location.href = url;
+    }
+    var items = [
+      { g: 'Aller à', t: 'À propos', h: '§ 01', u: sec('apropos') },
+      { g: 'Aller à', t: 'Projets', h: '§ 02', u: sec('projets') },
+      { g: 'Aller à', t: 'Parcours', h: '§ 03', u: sec('parcours') },
+      { g: 'Aller à', t: 'Compétences', h: '§ 04', u: sec('competences') },
+      { g: 'Aller à', t: 'Langues', h: '§ 05', u: sec('langues') },
+      { g: 'Aller à', t: 'Contact', h: '§ 06', u: sec('contact') },
+      { g: 'Projets', t: 'Tous les projets', h: 'liste', u: pre + 'projets/index.html' },
+      { g: 'Projets', t: 'Application Symfony conteneurisée', h: '2025', u: pre + 'projets/symfony-docker.html' },
+      { g: 'Projets', t: 'Jeu web 2048', h: '2025', u: pre + 'projets/jeu-2048.html' },
+      { g: 'Projets', t: 'Portfolio personnel', h: '2026', u: pre + 'projets/portfolio.html' },
+      { g: 'Actions', t: 'Télécharger mon CV', h: 'PDF', f: function () { var a = document.createElement('a'); a.href = pre + 'assets/cv/CV-Camyl-Khebache.pdf'; a.download = ''; document.body.appendChild(a); a.click(); a.remove(); } },
+      { g: 'Actions', t: 'Copier mon e-mail', h: mail, f: function () {
+          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(mail).then(function () { say('E-mail copié'); }, function () { say(mail); });
+          else say(mail); } },
+      { g: 'Actions', t: 'Écrire un e-mail', h: 'mailto', u: 'mailto:' + mail },
+      { g: 'Actions', t: 'Appeler', h: '06 73 60 88 94', u: 'tel:+33673608894' },
+      { g: 'Actions', t: 'GitHub', h: '↗', u: 'https://github.com/Camyl57/Projets', b: 1 },
+      { g: 'Actions', t: 'LinkedIn', h: '↗', u: 'https://www.linkedin.com/in/camyl-khebache-8961a1247/', b: 1 },
+      { g: 'Actions', t: 'Basculer thème clair / sombre', h: 'thème', f: function () { if (tbtn) tbtn.click(); } }
+    ];
+
+    var dlg = document.createElement('dialog');
+    dlg.className = 'palette'; dlg.setAttribute('aria-label', 'Navigation rapide');
+    dlg.innerHTML = '<input class="palette-input" type="text" role="combobox" aria-expanded="true" aria-controls="pal-list" aria-autocomplete="list" placeholder="Aller à une section, un projet, une action…" autocomplete="off" spellcheck="false">' +
+      '<ul class="palette-list" id="pal-list" role="listbox" aria-label="Résultats"></ul>' +
+      '<div class="palette-foot"><span>↑↓ naviguer</span><span>↵ ouvrir</span><span>Échap fermer</span></div>';
+    document.body.appendChild(dlg);
+    var input = dlg.querySelector('input'), list = dlg.querySelector('ul');
+    var shown = [], sel = 0;
+    var norm = function (s) { return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); };
+
+    function render() {
+      var q = norm(input.value.trim()), last = '', html = '';
+      shown = items.filter(function (it) { return !q || norm(it.t + ' ' + it.g).indexOf(q) > -1; });
+      if (sel >= shown.length) sel = 0;
+      shown.forEach(function (it, i) {
+        if (it.g !== last) { html += '<li class="grp" role="presentation">' + it.g + '</li>'; last = it.g; }
+        html += '<li role="option" id="pal-' + i + '" data-i="' + i + '" aria-selected="' + (i === sel) + '"><span>' + it.t + '</span><small>' + it.h + '</small></li>';
+      });
+      list.innerHTML = html || '<li class="palette-empty" role="presentation">Aucun résultat</li>';
+      input.setAttribute('aria-activedescendant', shown.length ? 'pal-' + sel : '');
+      var s = list.querySelector('[aria-selected="true"]');
+      if (s && s.scrollIntoView) s.scrollIntoView({ block: 'nearest' });
+    }
+    function run(i) {
+      var it = shown[i]; if (!it) return;
+      dlg.close();
+      setTimeout(function () { if (it.f) it.f(); else go(it.u, it.b); }, 60);
+    }
+    function openPal() { if (dlg.open) return; input.value = ''; sel = 0; render(); dlg.showModal(); input.focus(); }
+
+    input.addEventListener('input', function () { sel = 0; render(); });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); sel = Math.min(sel + 1, shown.length - 1); render(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); sel = Math.max(sel - 1, 0); render(); }
+      else if (e.key === 'Enter') { e.preventDefault(); run(sel); }
+    });
+    list.addEventListener('click', function (e) { var li = e.target.closest('[role="option"]'); if (li) run(+li.getAttribute('data-i')); });
+    list.addEventListener('pointermove', function (e) {
+      var li = e.target.closest('[role="option"]');
+      if (li && +li.getAttribute('data-i') !== sel) { sel = +li.getAttribute('data-i'); [].forEach.call(list.querySelectorAll('[role="option"]'), function (n) { n.setAttribute('aria-selected', n === li); }); }
+    });
+    dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
+    document.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'k') { e.preventDefault(); dlg.open ? dlg.close() : openPal(); }
+    });
+    var pb = document.querySelector('.palette-btn');
+    if (pb) {
+      pb.addEventListener('click', openPal);
+      if (/Mac|iPhone|iPad/.test(navigator.platform || '')) { var k = pb.querySelector('kbd'); if (k) k.textContent = '⌘'; }
+    }
+  })();
+
+  // ---------- Liens du menu : le texte se « brouille » au survol ----------
+  if (!reduce && fine) {
+    $$('.menu a').forEach(function (a) {
+      a.addEventListener('mouseenter', function () { if (!a.dataset.busy) { a.dataset.busy = '1'; scramble(a, 380); setTimeout(function () { delete a.dataset.busy; }, 420); } });
+    });
+  }
+
+  // ---------- Parallaxe à la souris dans le hero ----------
+  var heroEl = document.querySelector('.hero');
+  if (heroEl && !reduce && fine) {
+    heroEl.addEventListener('pointermove', function (e) {
+      var r = heroEl.getBoundingClientRect();
+      heroEl.style.setProperty('--px', (((e.clientX - r.left) / r.width) * 2 - 1).toFixed(3));
+      heroEl.style.setProperty('--py', (((e.clientY - r.top) / r.height) * 2 - 1).toFixed(3));
+    });
+    heroEl.addEventListener('pointerleave', function () { heroEl.style.setProperty('--px', 0); heroEl.style.setProperty('--py', 0); });
   }
 
   // ---------- Défilement : progression, section active, frise, parallaxe ----------
