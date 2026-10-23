@@ -343,3 +343,50 @@ dialog.palette::backdrop { background: rgba(20,42,107,.35); backdrop-filter: blu
   .pk { display: none; }
   .hero-text, .term { translate: none; }
 }
+
+/* ===== Compétences : sélecteur animé ===== */
+.skills-ui { display: grid; gap: 28px; grid-template-columns: 1fr; margin-top: 44px; align-items: start; }
+@media (min-width: 860px) { .skills-ui { grid-template-columns: 300px 1fr; gap: 40px; } }
+.skill-tabs { display: none; }
+.js .skill-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+@media (min-width: 860px) { .js .skill-tabs { flex-direction: column; flex-wrap: nowrap; gap: 6px; } }
+.skill-tab { position: relative; display: flex; align-items: baseline; gap: 14px; padding: 14px 18px; border: 1px solid transparent; border-radius: 12px;
+  background: transparent; color: var(--muted); font: inherit; text-align: left; cursor: pointer; overflow: hidden;
+  transition: background .3s, color .3s, border-color .3s, transform .3s; }
+.skill-tab .n { font-family: var(--mono); font-size: 12px; color: var(--dolphin); transition: color .3s; }
+.skill-tab .t { font-size: 17px; font-weight: 600; }
+.skill-tab:hover { color: var(--text); transform: translateX(4px); }
+.skill-tab[aria-selected="true"] { background: var(--card); color: var(--text); border-color: var(--line); box-shadow: var(--shadow); }
+.skill-tab[aria-selected="true"] .n { color: var(--accent); }
+.skill-tab .bar { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: linear-gradient(90deg, var(--accent-2), var(--accent));
+  transform: scaleX(0); transform-origin: 0 50%; }
+.skills-ui.run:not(.manual) .skill-tab[aria-selected="true"] .bar { animation: tabBar 6s linear forwards; }
+.skills-ui.run:not(.manual):hover .bar, .skills-ui.run:not(.manual):focus-within .bar { animation-play-state: paused; }
+@keyframes tabBar { to { transform: scaleX(1); } }
+@media (max-width: 859px) { .skill-tab { padding: 10px 14px; } .skill-tab .n { display: none; } .skill-tab .t { font-size: 15px; } }
+
+.skill-panels { display: grid; border: 1px solid var(--line); border-radius: 16px; background: var(--card); box-shadow: var(--shadow); min-height: 220px; overflow: hidden; position: relative; }
+.skill-panel { padding: 30px 28px 34px; }
+.skill-panel + .skill-panel { border-top: 1px solid var(--line); }
+.js .skill-panel { grid-area: 1 / 1; border-top: 0; }
+.skill-panel h3 { font-size: 24px; font-weight: 600; letter-spacing: -0.01em; }
+.skill-panel p { color: var(--muted); font-size: 16px; margin: 6px 0 24px; max-width: 520px; }
+.chips { list-style: none; display: flex; flex-wrap: wrap; gap: 10px; }
+.chips li { font-family: var(--mono); font-size: 14px; padding: 9px 16px; border: 1px solid var(--line); border-radius: 999px; background: var(--bg); color: var(--text);
+  transition: border-color .2s, background .2s, transform .2s; }
+.chips li:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent-2) 16%, var(--bg)); transform: translateY(-3px); }
+.js .skill-panel { opacity: 0; visibility: hidden; transform: translateX(24px); transition: opacity .45s, transform .55s cubic-bezier(.2,.7,.2,1), visibility 0s .45s; }
+.js .skill-panel.on { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+.js .skill-panel.on .chips li { animation: chipIn .55s cubic-bezier(.3,1.5,.5,1) both; animation-delay: calc(var(--k, 0) * 70ms + .12s); }
+@keyframes chipIn { from { opacity: 0; transform: translateY(14px) scale(.7); } }
+.skill-panel::after { content: attr(data-n); position: absolute; right: 22px; bottom: -18px; font-size: 140px; font-weight: 700; letter-spacing: -0.04em; line-height: 1;
+  color: transparent; -webkit-text-stroke: 1.5px var(--line); pointer-events: none; }
+@media (max-width: 520px) { .skill-panel { padding: 24px 18px 28px; } .skill-panel::after { font-size: 90px; } .chips li { font-size: 13px; padding: 8px 13px; } }
+.skill-panels { padding: 0; }
+.js .skills-ui .skill-panel:not(.on) .chips li { animation: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .js .skill-panel { transition: none; transform: none; }
+  .js .skill-panel.on .chips li { animation: none; }
+  .skills-ui .bar { display: none; }
+}
