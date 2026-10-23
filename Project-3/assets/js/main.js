@@ -103,7 +103,7 @@
   var groups = [
     ['section .eyebrow, section > .wrap > .body, .about-grid > div, .about-grid > figure', 0],
     ['.focus > div', 1], ['.grid > .project', 1], ['.timeline > .item', 1], ['.others', 0],
-    ['.skill-group', 1], ['.langs > li', 1], ['.contact-list > li', 1], ['.stats', 0],
+    ['.skills-ui', 0], ['.langs > li', 1], ['.contact-list > li', 1], ['.stats', 0],
     ['.detail section, .detail .pager', 1]
   ];
   var els = [];
@@ -396,6 +396,43 @@
     });
     heroEl.addEventListener('pointerleave', function () { heroEl.style.setProperty('--px', 0); heroEl.style.setProperty('--py', 0); });
   }
+
+  // ---------- Compétences : sélecteur animé ----------
+  (function () {
+    var ui = document.querySelector('.skills-ui');
+    if (!ui) return;
+    var tabs = $$('.skill-tab', ui), panels = $$('.skill-panel', ui), cur = 0;
+    panels.forEach(function (p, i) {
+      p.setAttribute('data-n', '0' + (i + 1));
+      $$('.chips li', p).forEach(function (li, k) { li.style.setProperty('--k', k); });
+    });
+    function select(i, focus, manual) {
+      cur = (i + tabs.length) % tabs.length;
+      tabs.forEach(function (t, k) {
+        var on = k === cur;
+        t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1;
+        panels[k].classList.toggle('on', on);
+        if (on) { t.classList.remove('restart'); void t.offsetWidth; }
+      });
+      if (focus) tabs[cur].focus();
+      if (manual) ui.classList.add('manual');
+    }
+    tabs.forEach(function (t, i) {
+      t.addEventListener('click', function () { select(i, false, true); });
+      t.addEventListener('keydown', function (e) {
+        var k = e.key;
+        if (k === 'ArrowDown' || k === 'ArrowRight') { e.preventDefault(); select(cur + 1, true, true); }
+        else if (k === 'ArrowUp' || k === 'ArrowLeft') { e.preventDefault(); select(cur - 1, true, true); }
+        else if (k === 'Home') { e.preventDefault(); select(0, true, true); }
+        else if (k === 'End') { e.preventDefault(); select(tabs.length - 1, true, true); }
+      });
+      // la barre de progression termine : on passe au domaine suivant
+      $$('.bar', t)[0].addEventListener('animationend', function () { if (!ui.classList.contains('manual')) select(cur + 1, false, false); });
+    });
+    select(0, false, false);
+    if (reduce || !('IntersectionObserver' in window)) ui.classList.add('manual');
+    else new IntersectionObserver(function (en) { ui.classList.toggle('run', en[0].isIntersecting); }, { threshold: 0.35 }).observe(ui);
+  })();
 
   // ---------- Défilement : progression, section active, frise, parallaxe ----------
   var bar = document.querySelector('.progress');

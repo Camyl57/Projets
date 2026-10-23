@@ -224,27 +224,35 @@
 <section id="competences" class="alt" aria-labelledby="t-competences">
   <div class="wrap">
     <div class="eyebrow">§ 04 <span>Compétences</span></div>
-    <h2 id="t-competences">Ce avec quoi <em>je travaille.</em></h2>
-    <div class="skill-groups">
-      <div class="skill-group">
-        <h3>Réseaux et systèmes</h3>
-        <p>Le domaine vers lequel je m'oriente.</p>
-        <ul class="tags"><li>Linux</li><li>WSL</li><li>Bash</li><li>Docker</li><li>Nginx</li></ul>
+    <h2 id="t-competences">Compétences <em>&amp; qualités.</em></h2>
+    <div class="skills-ui">
+      <div class="skill-tabs" role="tablist" aria-label="Domaines de compétences" aria-orientation="vertical">
+        <button class="skill-tab" role="tab" type="button" id="tab-1" aria-controls="panel-1" aria-selected="true" tabindex="0"><span class="n">01</span><span class="t">Réseaux et systèmes</span><i class="bar"></i></button>
+        <button class="skill-tab" role="tab" type="button" id="tab-2" aria-controls="panel-2" aria-selected="false" tabindex="-1"><span class="n">02</span><span class="t">Développement</span><i class="bar"></i></button>
+        <button class="skill-tab" role="tab" type="button" id="tab-3" aria-controls="panel-3" aria-selected="false" tabindex="-1"><span class="n">03</span><span class="t">Outils</span><i class="bar"></i></button>
+        <button class="skill-tab" role="tab" type="button" id="tab-4" aria-controls="panel-4" aria-selected="false" tabindex="-1"><span class="n">04</span><span class="t">Qualités</span><i class="bar"></i></button>
       </div>
-      <div class="skill-group">
-        <h3>Développement</h3>
-        <p>Mon point de départ, utilisé pour automatiser.</p>
-        <ul class="tags"><li>Python</li><li>TypeScript</li><li>JavaScript</li><li>Java</li><li>PHP</li><li>SQL</li><li>HTML/CSS</li><li>Symfony</li><li>Vue.js</li></ul>
-      </div>
-      <div class="skill-group">
-        <h3>Outils</h3>
-        <p>Pour versionner, livrer et déployer.</p>
-        <ul class="tags"><li>Git</li><li>GitLab</li><li>Makefile</li><li>Container Registry</li></ul>
-      </div>
-      <div class="skill-group">
-        <h3>Qualités</h3>
-        <p>Ce que j'apporte au sein d'une équipe.</p>
-        <ul class="tags"><li>Adaptabilité</li><li>Communication</li><li>Autonomie</li><li>Esprit d'équipe</li><li>Résolution de problèmes</li></ul>
+      <div class="skill-panels">
+        <div class="skill-panel" role="tabpanel" id="panel-1" aria-labelledby="tab-1">
+          <h3>Réseaux et systèmes</h3>
+          <p>Le domaine vers lequel je m'oriente.</p>
+          <ul class="chips"><li>Linux</li><li>WSL</li><li>Bash</li><li>Docker</li><li>Nginx</li></ul>
+        </div>
+        <div class="skill-panel" role="tabpanel" id="panel-2" aria-labelledby="tab-2">
+          <h3>Développement</h3>
+          <p>Mon point de départ, utilisé pour automatiser.</p>
+          <ul class="chips"><li>Python</li><li>TypeScript</li><li>JavaScript</li><li>Java</li><li>PHP</li><li>SQL</li><li>HTML/CSS</li><li>Symfony</li><li>Vue.js</li></ul>
+        </div>
+        <div class="skill-panel" role="tabpanel" id="panel-3" aria-labelledby="tab-3">
+          <h3>Outils</h3>
+          <p>Pour versionner, livrer et déployer.</p>
+          <ul class="chips"><li>Git</li><li>GitLab</li><li>Makefile</li><li>Container Registry</li></ul>
+        </div>
+        <div class="skill-panel" role="tabpanel" id="panel-4" aria-labelledby="tab-4">
+          <h3>Qualités</h3>
+          <p>Ce que j'apporte au sein d'une équipe.</p>
+          <ul class="chips"><li>Adaptabilité</li><li>Communication</li><li>Autonomie</li><li>Esprit d'équipe</li><li>Résolution de problèmes</li></ul>
+        </div>
       </div>
     </div>
   </div>
