@@ -16,4 +16,4 @@ Project 2 – SAÉ 4.01 – Application Deployment Project | IUT de Metz Metz, F
 Project 3 – Personal Portfolio Website | Static site (HTML, CSS, JavaScript)
 10/2026
 • Built a responsive, accessible portfolio presenting my background, projects and contact details, with no framework or external dependency
-• Live at https://camyl57.github.io/Projets/Project-3/
+• Live at [camyl57.github.io](https://camyl57.github.io/) · Source: [Camyl57.github.io](https://github.com/Camyl57/Camyl57.github.io)
