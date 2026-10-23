@@ -414,17 +414,8 @@ dialog.palette::backdrop { background: rgba(20,42,107,.35); backdrop-filter: blu
 .cert-main .cert-ico svg { width: 30px; height: 30px; }
 .cert-main h3 { font-size: 26px; letter-spacing: -0.01em; margin: 4px 0 2px; }
 .cert-main .cert-meta { padding-top: 10px; }
-.validity { flex: 1 1 300px; max-width: 460px; }
-.v-top { display: flex; justify-content: space-between; gap: 12px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
-.v-track { height: 8px; margin: 12px 0 10px; border-radius: 99px; background: var(--bg-2); overflow: hidden; }
-.v-fill { display: block; height: 100%; width: var(--p, 0%); border-radius: 99px; background: linear-gradient(90deg, var(--accent-2), var(--accent));
-  transform: scaleX(0); transform-origin: 0 50%; animation: vFill 1.6s cubic-bezier(.2,.7,.2,1) .4s forwards; animation-play-state: paused; }
-.cert-grid.in-view .v-fill, .cert.feat:not([data-reveal]) .v-fill, .cert.feat.in .v-fill { animation-play-state: running; }
-@keyframes vFill { to { transform: scaleX(1); } }
-.v-note { font-size: 13px; color: var(--muted); }
 @media (max-width: 520px) { .cert { padding: 22px 18px; } .cert-main { flex-direction: column; gap: 14px; } .cert-main h3 { font-size: 22px; } }
 
-@media (prefers-reduced-motion: reduce) { .v-fill { animation: none; transform: none; } }
 
 /* Barre du haut : menu plus compact sur écran moyen */
 @media (min-width: 801px) and (max-width: 1040px) { .menu { gap: 14px; } .menu a { font-size: 12px; } .nav-contact { padding: 8px 14px; } }
