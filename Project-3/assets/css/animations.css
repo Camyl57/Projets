@@ -315,20 +315,23 @@ dialog.palette::backdrop { background: rgba(20,42,107,.35); backdrop-filter: blu
 .toast.on { opacity: 1; transform: translate(-50%, 0); }
 
 /* ===== Schéma réseau animé ===== */
-.topo { margin-top: 36px; max-width: 760px; color: var(--text); }
-.topo svg { width: 100%; height: auto; overflow: visible; }
-.topo .wire { stroke: var(--dolphin); stroke-width: 2; stroke-dasharray: 6 8; animation: dash 1.2s linear infinite; }
-@keyframes dash { to { stroke-dashoffset: -14; } }
-.topo .nodes rect { fill: var(--card); stroke: var(--line); stroke-width: 1.5; transition: stroke .3s; }
-.topo .nodes g:hover rect { stroke: var(--accent); }
-.topo text { fill: var(--text); font-family: var(--mono); font-size: 12.5px; text-anchor: middle; dominant-baseline: middle; }
-.topo .cap { fill: var(--muted); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
-.topo .pk { fill: var(--accent-2); filter: drop-shadow(0 0 5px var(--accent-2)); animation: packet 5.4s cubic-bezier(.45,.05,.55,.95) infinite; }
-.topo .p2 { animation-delay: 1.8s; } .topo .p3 { animation-delay: 3.6s; }
-.topo .pk.back { fill: var(--accent); animation-name: packetBack; animation-delay: 2.7s; }
-@keyframes packet { 0% { transform: translateX(0); opacity: 0; } 8% { opacity: 1; } 92% { opacity: 1; } 100% { transform: translateX(640px); opacity: 0; } }
-@keyframes packetBack { 0% { transform: translateX(0); opacity: 0; } 8% { opacity: 1; } 92% { opacity: 1; } 100% { transform: translateX(-640px); opacity: 0; } }
-@media (max-width: 520px) { .topo .nodes text { display: none; } }
+.topo { margin-top: 38px; max-width: 760px; }
+.net-row { position: relative; display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
+.lane { position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px;
+  background: repeating-linear-gradient(90deg, var(--dolphin) 0 6px, transparent 6px 14px); animation: lane 1.2s linear infinite; }
+@keyframes lane { to { background-position: 14px 0; } }
+.hop { position: relative; z-index: 1; width: 15%; padding: 16px 4px; text-align: center; border: 1.5px solid var(--line); border-radius: 12px;
+  background: var(--card); font-family: var(--mono); font-size: 12.5px; line-height: 1.2; box-shadow: var(--shadow); transition: border-color .3s, transform .3s; }
+.hop:hover { border-color: var(--accent); transform: translateY(-3px); }
+.pk { position: absolute; z-index: 2; top: 50%; left: 7.5%; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; background: var(--accent-2);
+  box-shadow: 0 0 12px 2px var(--accent-2); opacity: 0; animation: run 5.4s cubic-bezier(.45,.05,.55,.95) infinite; }
+.pk:nth-child(2) { animation-delay: 1.8s; } .pk:nth-child(3) { animation-delay: 3.6s; }
+.pk.back { background: var(--accent); box-shadow: 0 0 12px 2px var(--accent); animation-name: runBack; animation-delay: 2.7s; }
+@keyframes run { 0% { left: 7.5%; opacity: 0; } 8% { opacity: 1; } 92% { opacity: 1; } 100% { left: 92.5%; opacity: 0; } }
+@keyframes runBack { 0% { left: 92.5%; opacity: 0; } 8% { opacity: 1; } 92% { opacity: 1; } 100% { left: 7.5%; opacity: 0; } }
+.topo figcaption { margin-top: 14px; text-align: center; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.live { display: inline-block; width: 7px; height: 7px; margin-right: 8px; border-radius: 50%; background: #1f9d63; animation: ping 2.4s ease-out infinite; }
+@media (max-width: 520px) { .hop { font-size: 10.5px; padding: 14px 2px; border-radius: 9px; } }
 
 /* Parallaxe à la souris */
 .hero-text { translate: calc(var(--px, 0) * -7px) calc(var(--sy, 0) * -0.07px + var(--py, 0) * -5px); transition: translate .35s ease-out; }
@@ -336,7 +339,7 @@ dialog.palette::backdrop { background: rgba(20,42,107,.35); backdrop-filter: blu
 
 @media (prefers-reduced-motion: reduce) {
   .logo b, .logo i, dialog.palette[open], dialog.palette::backdrop { animation: none; }
-  .topo .wire, .topo .pk { animation: none; }
-  .topo .pk { display: none; }
+  .lane, .live { animation: none; }
+  .pk { display: none; }
   .hero-text, .term { translate: none; }
 }
