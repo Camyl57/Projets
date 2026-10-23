@@ -435,13 +435,6 @@
     else new IntersectionObserver(function (en) { ui.classList.toggle('run', en[0].isIntersecting); }, { threshold: 0.35 }).observe(ui);
   })();
 
-  // ---------- Certifications : part de la validité écoulée ----------
-  $$('.validity').forEach(function (v) {
-    var a = new Date(v.getAttribute('data-from') + '-01'), b = new Date(v.getAttribute('data-to') + '-01');
-    var p = Math.max(0, Math.min(1, (Date.now() - a) / (b - a)));
-    v.style.setProperty('--p', (p * 100).toFixed(1) + '%');
-  });
-
   // ---------- Défilement : progression, section active, frise, parallaxe ----------
   var bar = document.querySelector('.progress');
   var links = $$('.menu a[href^="#"]');
