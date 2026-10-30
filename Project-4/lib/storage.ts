@@ -1,4 +1,4 @@
-import type { Group, GroupDraft } from "./types";
+import type { Group, GroupDraft, Restaurant, RestaurantSource } from "./types";
 
 /**
  * Stockage temporaire des groupes dans le navigateur (localStorage).
@@ -105,4 +105,9 @@ export function setMatch(code: string, restaurantId: string | null) {
 /** Efface tes votes et le match pour recommencer le swipe. */
 export function resetVotes(code: string) {
   updateGroup(code, (g) => ({ ...g, votes: {}, matchId: null }));
+}
+
+/** Fige la liste de restos du groupe : les votes s'y réfèrent par identifiant. */
+export function setRestaurants(code: string, restaurants: Restaurant[], source: RestaurantSource) {
+  updateGroup(code, (g) => ({ ...g, restaurants, restaurantsSource: source, votes: {}, matchId: null }));
 }

@@ -7,24 +7,24 @@ import { GroupNotFound, LobbySkeleton, useGroup } from "@/components/GroupLobby"
 import { Logo } from "@/components/Logo";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { consensusIds, DEMO_FRIENDS } from "@/lib/friends";
-import { buildRestaurants } from "@/lib/restaurants";
 import { resetVotes, setMatch, setVote } from "@/lib/storage";
-import type { Group } from "@/lib/types";
+import type { Group, Restaurant, RestaurantSource } from "@/lib/types";
 import { MatchScreen } from "./MatchScreen";
+import { RestaurantLoader } from "./RestaurantLoader";
 import { SwipeCard } from "./SwipeCard";
 
 export function SwipeGame({ code }: { code: string }) {
   const group = useGroup(code);
   if (group === undefined) return <LobbySkeleton />;
   if (group === null) return <GroupNotFound code={code} />;
-  return <Deck group={group} />;
+  if (!group.restaurants?.length) return <RestaurantLoader group={group} />;
+  return <Deck group={group} restaurants={group.restaurants} source={group.restaurantsSource ?? "demo"} />;
 }
 
-function Deck({ group }: { group: Group }) {
+function Deck({ group, restaurants, source }: { group: Group; restaurants: Restaurant[]; source: RestaurantSource }) {
   const { code } = group;
   const [dir, setDir] = useState<1 | -1>(1);
 
-  const restaurants = useMemo(() => buildRestaurants(code, group), [code, group]);
   const consensus = useMemo(() => consensusIds(code, restaurants), [code, restaurants]);
 
   const votes = group.votes ?? {};
@@ -83,6 +83,9 @@ function Deck({ group }: { group: Group }) {
             transition={{ type: "spring", stiffness: 200, damping: 26 }}
           />
         </div>
+        <p className="text-xs font-semibold text-ink-soft">
+          {source === "google" ? "🌍 Restos réels autour de toi · données Google Maps" : "🧪 Restos d'exemple (fictifs)"}
+        </p>
         <p className="flex items-center gap-2 text-sm text-ink-soft">
           <span aria-hidden className="flex -space-x-1.5">
             {DEMO_FRIENDS.map((f) => (

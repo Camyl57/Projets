@@ -24,14 +24,32 @@ La géolocalisation du navigateur ne fonctionne qu'en **https ou sur `localhost`
 | Génération du code à 4 chiffres, copie et partage | fait |
 | Page « Rejoindre » (saisie du code) et salon du groupe | fait (local) |
 | Swipe des restos (cartes empilées, glisser ou boutons ou flèches du clavier) | fait |
-| Restos mockés autour de la position (12, fictifs, déterministes) | fait |
+| Vrais restos autour de la position (Google Places, notes, prix, filtre budget) | fait (clé à renseigner) |
+| Restos d'exemple en repli si Google est indisponible | fait |
 | Match quand tout le monde a validé | fait (amis simulés) |
 | Groupes et votes partagés entre téléphones (serveur temps réel) | à faire |
-| Vrais restos (API Places) à la place des restos fictifs | à faire |
+
+## Vrais restos : Google Places
+
+Les restos viennent de **Google Places API (New)**, appelée **côté serveur** par `app/api/restaurants/route.ts` : la clé n'est jamais envoyée au navigateur.
+
+1. Sur https://console.cloud.google.com : créer un projet et y activer la facturation.
+2. *API et services → Bibliothèque* : activer **Places API (New)**.
+3. *Identifiants → Créer des identifiants → Clé API*, puis la **restreindre** à *Places API (New)* uniquement.
+4. *Quotas* : fixer un plafond quotidien, et créer une **alerte de budget** (*Facturation → Budgets et alertes*).
+5. Copier `.env.example` en `.env.local` et y coller la clé :
+   ```
+   GOOGLE_PLACES_API_KEY=ta_clé
+   ```
+6. Relancer `npm run dev`. Sans clé, l'appli affiche un message clair et propose des restos d'exemple.
+
+**Coût** : on demande la note, le prix et le téléphone, ce qui relève de la tarification « Enterprise » de *Nearby Search* (avec un quota gratuit mensuel). Une partie en consomme 2 appels (recherche générale + cuisines choisies), 4 si peu de résultats. Les résultats sont gardés quelques minutes côté serveur et la route limite chaque IP à 12 recherches par minute. Vérifier la grille tarifaire actuelle de Google avant de partager le site largement.
+
+**Conditions d'utilisation** : l'écran de swipe affiche la mention « données Google Maps ». La liste des restos est conservée dans le navigateur uniquement le temps du groupe ; avec un vrai serveur, ne stocker que les identifiants de lieux (`place id`) et redemander les détails à Google.
 
 ## Important : mode démo
 
-Le swipe fonctionne de bout en bout, mais **tes amis sont simulés** (Lina, Tom et Sarah, voir `lib/friends.ts`) et les **restos sont fictifs** (`lib/restaurants.ts`). Un match est garanti entre le 4e et le 7e resto. Pour passer en vrai : remplacer `consensusIds` par les votes reçus du serveur et `buildRestaurants` par un appel à une API de lieux.
+Le swipe fonctionne de bout en bout, mais **tes amis sont simulés** (Lina, Tom et Sarah, voir `lib/friends.ts`). Un match est garanti entre le 4e et le 7e resto. Pour passer en vrai : remplacer `consensusIds` par les votes reçus du serveur.
 
 ## Les groupes sont locaux pour l'instant
 
@@ -53,7 +71,9 @@ components/
   ui/                      Button, ChoiceCard
   CodeDigits, ShareCode, GroupSummary, GroupLobby, JoinForm, Logo
 hooks/useGeolocation.ts    machine à états de la géolocalisation
-lib/                       types, données, stockage, restaurants fictifs, amis simulés, aléatoire déterministe, nom de l'app
+lib/                       types, données, stockage, amis simulés, restos d'exemple, nom de l'app
+lib/places/google.ts       recherche Google Places (serveur), normalisation, classement
+app/api/restaurants/       route serveur : validation, limite de débit, appel Google
 ```
 
 Le nom de l'application se change dans `lib/brand.ts`.

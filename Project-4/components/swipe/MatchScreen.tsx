@@ -4,7 +4,8 @@ import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { DEMO_FRIENDS } from "@/lib/friends";
-import { mapsUrl, type Restaurant } from "@/lib/restaurants";
+import { mapsUrl } from "@/lib/restaurants";
+import type { Restaurant } from "@/lib/types";
 import { RestaurantCard } from "./RestaurantCard";
 
 /** Confettis alimentaires : positions fixes (rendu identique serveur / client). */
@@ -92,6 +93,21 @@ export function MatchScreen({ restaurant, onContinue, onRestart }: Props) {
             ))}
             <span className="w-full text-xs font-medium text-ink-soft">ont tous dit oui (démo)</span>
           </p>
+
+          {restaurant.phone || restaurant.website ? (
+            <p className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-sm font-bold">
+              {restaurant.phone ? (
+                <a href={`tel:${restaurant.phone.replace(/\s/g, "")}`} className="underline underline-offset-4">
+                  📞 {restaurant.phone}
+                </a>
+              ) : null}
+              {restaurant.website ? (
+                <a href={restaurant.website} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">
+                  🌐 Site web
+                </a>
+              ) : null}
+            </p>
+          ) : null}
 
           <div className="flex flex-col gap-3">
             <ButtonLink href={mapsUrl(restaurant)} external big className="!min-h-16 w-full !text-xl">
