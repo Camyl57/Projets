@@ -5,7 +5,7 @@ import { CodeDigits } from "@/components/CodeDigits";
 import { GroupSummary } from "@/components/GroupSummary";
 import { ShareCode } from "@/components/ShareCode";
 import { ButtonLink } from "@/components/ui/Button";
-import type { Group } from "@/lib/types";
+import type { CreatedGroup } from "./CreateWizard";
 
 /** Confettis alimentaires : positions fixes pour rester identiques côté serveur et client. */
 const CONFETTI = [
@@ -19,7 +19,7 @@ const CONFETTI = [
   { e: "🥗", x: "92%", d: 0.2, r: -35 },
 ];
 
-export function StepDone({ group }: { group: Group }) {
+export function StepDone({ group }: { group: CreatedGroup }) {
   return (
     <div className="relative flex flex-col items-center gap-7 text-center">
       <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-6 h-72 overflow-hidden">

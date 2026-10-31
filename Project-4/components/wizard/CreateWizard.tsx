@@ -1,18 +1,25 @@
 "use client";
 
-import { useEffect, useReducer, useRef } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { Logo } from "@/components/Logo";
+import { ProfileFields } from "@/components/ProfileFields";
+import { SetupNotice } from "@/components/SetupNotice";
 import { Button } from "@/components/ui/Button";
-import { createGroup } from "@/lib/storage";
-import type { BudgetId, Group, GroupLocation } from "@/lib/types";
+import { saveProfile, useProfile } from "@/lib/profile";
+import { createGroupRemote } from "@/lib/remote";
+import { explain, isSupabaseConfigured } from "@/lib/supabase/client";
+import type { BudgetId, GroupDraft, GroupLocation, Profile } from "@/lib/types";
 import { StepBudget } from "./StepBudget";
 import { ANY_CUISINE, StepCuisine } from "./StepCuisine";
 import { StepDone } from "./StepDone";
 import { StepLocation } from "./StepLocation";
 
-type Step = 0 | 1 | 2 | 3;
+const LAST_STEP = 3;
+type Step = 0 | 1 | 2 | 3 | 4;
+
+export type CreatedGroup = GroupDraft & { code: string };
 
 type State = {
   step: Step;
@@ -20,7 +27,7 @@ type State = {
   location: GroupLocation | null;
   budget: BudgetId | null;
   cuisines: string[];
-  group: Group | null;
+  created: CreatedGroup | null;
   error: string | null;
 };
 
@@ -30,8 +37,8 @@ type Action =
   | { type: "cuisine"; id: string }
   | { type: "next" }
   | { type: "back" }
-  | { type: "done"; group: Group }
-  | { type: "error"; message: string };
+  | { type: "done"; group: CreatedGroup }
+  | { type: "error"; message: string | null };
 
 const initial: State = {
   step: 0,
@@ -39,7 +46,7 @@ const initial: State = {
   location: null,
   budget: null,
   cuisines: [],
-  group: null,
+  created: null,
   error: null,
 };
 
@@ -60,11 +67,11 @@ function reducer(state: State, action: Action): State {
       return { ...state, cuisines };
     }
     case "next":
-      return { ...state, step: Math.min(state.step + 1, 2) as Step, dir: 1, error: null };
+      return { ...state, step: Math.min(state.step + 1, LAST_STEP) as Step, dir: 1, error: null };
     case "back":
       return { ...state, step: Math.max(state.step - 1, 0) as Step, dir: -1, error: null };
     case "done":
-      return { ...state, step: 3, dir: 1, group: action.group, error: null };
+      return { ...state, step: 4, dir: 1, created: action.group, error: null };
     case "error":
       return { ...state, error: action.message };
   }
@@ -74,6 +81,7 @@ const STEPS = [
   { title: "Où est-ce qu'on mange ?", subtitle: "On cherche les restos autour de vous." },
   { title: "Quel budget par personne ?", subtitle: "Pour que personne ne grimace à l'addition." },
   { title: "Qu'est-ce qui vous fait envie ?", subtitle: "Choisis une ou plusieurs envies." },
+  { title: "Dernière chose : qui es-tu ?", subtitle: "Tes amis te verront avec ce prénom dans le salon." },
 ] as const;
 
 const slide = {
@@ -102,54 +110,80 @@ function StepPanel({ title, subtitle, children }: { title: string; subtitle: str
 }
 
 export function CreateWizard() {
+  if (!isSupabaseConfigured) return <SetupNotice />;
+  return <Wizard />;
+}
+
+function Wizard() {
   const [state, dispatch] = useReducer(reducer, initial);
   const { step, dir } = state;
+  const [busy, setBusy] = useState(false);
+
+  // Le profil enregistré sur l'appareil sert de point de départ ; ce qu'on tape le remplace.
+  const saved = useProfile();
+  const [edited, setEdited] = useState<Profile | null>(null);
+  const profile = edited ?? saved;
 
   const canNext =
-    step === 0 ? state.location !== null : step === 1 ? state.budget !== null : state.cuisines.length > 0;
+    step === 0
+      ? state.location !== null
+      : step === 1
+        ? state.budget !== null
+        : step === 2
+          ? state.cuisines.length > 0
+          : profile.name.trim().length > 0;
 
-  const submit = () => {
-    if (!state.location || !state.budget) return;
+  const submit = async () => {
+    if (!state.location || !state.budget || busy) return;
+    setBusy(true);
+    dispatch({ type: "error", message: null });
     try {
-      const group = createGroup({
+      const draft: GroupDraft = {
         location: state.location,
         budget: state.budget,
         cuisines: state.cuisines.filter((c) => c !== ANY_CUISINE),
-      });
-      dispatch({ type: "done", group });
-    } catch {
-      dispatch({ type: "error", message: "Impossible de créer le groupe, réessaie dans un instant." });
+      };
+      saveProfile(profile);
+      const code = await createGroupRemote(draft, { ...profile, name: profile.name.trim() });
+      dispatch({ type: "done", group: { ...draft, code } });
+    } catch (e) {
+      dispatch({ type: "error", message: explain(e) });
+    } finally {
+      setBusy(false);
     }
   };
 
-  const onContinue = () => (step === 2 ? submit() : dispatch({ type: "next" }));
+  const onContinue = () => (step === LAST_STEP ? void submit() : dispatch({ type: "next" }));
+  const inWizard = step <= LAST_STEP;
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col px-5 pt-5">
       <header className="flex items-center justify-between gap-3">
         <Logo />
-        {step < 3 ? (
+        {inWizard ? (
           <Link href="/" className="rounded-full px-3 py-1.5 text-sm font-bold text-ink-soft hover:bg-ink/5">
             Quitter
           </Link>
         ) : null}
       </header>
 
-      {step < 3 ? (
+      {inWizard ? (
         <nav aria-label="Progression" className="mt-6 flex flex-col gap-2">
           <div className="flex items-center justify-between text-sm font-bold">
             <button
               type="button"
               onClick={() => dispatch({ type: "back" })}
-              disabled={step === 0}
+              disabled={step === 0 || busy}
               className="-ml-2 rounded-full px-2 py-1 text-ink-soft enabled:hover:bg-ink/5 disabled:invisible"
             >
               ← Retour
             </button>
-            <span aria-live="polite">Étape {step + 1} sur 3</span>
+            <span aria-live="polite">
+              Étape {step + 1} sur {LAST_STEP + 1}
+            </span>
           </div>
           <div className="flex gap-2" aria-hidden>
-            {[0, 1, 2].map((i) => (
+            {STEPS.map((_, i) => (
               <div key={i} className="h-2.5 flex-1 overflow-hidden rounded-full bg-line">
                 <motion.div
                   className="h-full rounded-full bg-tomato"
@@ -189,20 +223,25 @@ export function CreateWizard() {
                 <StepCuisine value={state.cuisines} onToggle={(id) => dispatch({ type: "cuisine", id })} />
               </StepPanel>
             ) : null}
-            {step === 3 && state.group ? <StepDone group={state.group} /> : null}
+            {step === 3 ? (
+              <StepPanel title={STEPS[3].title} subtitle={STEPS[3].subtitle}>
+                <ProfileFields value={profile} onChange={setEdited} />
+              </StepPanel>
+            ) : null}
+            {step === 4 && state.created ? <StepDone group={state.created} /> : null}
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {step < 3 ? (
+      {inWizard ? (
         <div className="sticky bottom-0 -mx-5 mt-8 bg-gradient-to-t from-cream via-cream/95 to-transparent px-5 pb-6 pt-8">
           {state.error ? (
             <p role="alert" className="mb-3 rounded-2xl bg-tomato/15 px-4 py-2.5 text-sm font-semibold">
               {state.error}
             </p>
           ) : null}
-          <Button onClick={onContinue} disabled={!canNext} className="w-full">
-            {step === 2 ? "🎲 Générer le code du groupe" : "Continuer →"}
+          <Button onClick={onContinue} disabled={!canNext || busy} className="w-full">
+            {step === LAST_STEP ? (busy ? "Création du groupe…" : "🎲 Générer le code du groupe") : "Continuer →"}
           </Button>
         </div>
       ) : (

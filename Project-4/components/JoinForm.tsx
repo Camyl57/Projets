@@ -3,25 +3,27 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { JoinFields } from "@/components/JoinFields";
 import { Logo } from "@/components/Logo";
-import { Button } from "@/components/ui/Button";
+import { SetupNotice } from "@/components/SetupNotice";
+import { isSupabaseConfigured } from "@/lib/supabase/client";
 
-/** Saisie du code à 4 chiffres : un vrai champ invisible au-dessus de 4 cases. */
+/** Saisie du code à 4 chiffres : un vrai champ invisible au-dessus de 4 cases, puis prénom et avatar. */
 export function JoinForm() {
+  if (!isSupabaseConfigured) return <SetupNotice />;
+  return <CodeEntry />;
+}
+
+function CodeEntry() {
   const router = useRouter();
   const input = useRef<HTMLInputElement>(null);
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
   const complete = value.length === 4;
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (complete) router.push(`/groupe/${value}`);
-  };
-
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-5 pt-5">
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-5 pb-10 pt-5">
       <header className="flex items-center justify-between">
         <Logo />
         <Link href="/" className="rounded-full px-3 py-1.5 text-sm font-bold text-ink-soft hover:bg-ink/5">
@@ -29,7 +31,7 @@ export function JoinForm() {
         </Link>
       </header>
 
-      <form onSubmit={submit} className="flex flex-1 flex-col justify-center gap-8 pb-16 text-center">
+      <div className="flex flex-1 flex-col justify-center gap-8 py-8 text-center">
         <div className="flex flex-col gap-2">
           <span aria-hidden className="text-5xl">
             🔑
@@ -75,10 +77,20 @@ export function JoinForm() {
           </div>
         </div>
 
-        <Button type="submit" disabled={!complete} big className="w-full">
-          Rejoindre le groupe →
-        </Button>
-      </form>
+        <AnimatePresence initial={false}>
+          {complete ? (
+            <motion.div
+              key="profile"
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 12 }}
+              transition={{ type: "spring", stiffness: 300, damping: 26 }}
+            >
+              <JoinFields code={value} onJoined={() => router.push(`/groupe/${value}`)} />
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+      </div>
     </main>
   );
 }

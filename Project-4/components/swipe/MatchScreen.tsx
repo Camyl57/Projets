@@ -3,9 +3,8 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Button, ButtonLink } from "@/components/ui/Button";
-import { DEMO_FRIENDS } from "@/lib/friends";
 import { mapsUrl } from "@/lib/restaurants";
-import type { Restaurant } from "@/lib/types";
+import type { Member, Restaurant } from "@/lib/types";
 import { RestaurantCard } from "./RestaurantCard";
 
 /** Confettis alimentaires : positions fixes (rendu identique serveur / client). */
@@ -22,11 +21,14 @@ const CONFETTI = [
 
 type Props = {
   restaurant: Restaurant;
+  /** Tous les membres du groupe : un match veut dire qu'ils ont tous dit oui. */
+  members: Member[];
+  isHost: boolean;
   onContinue: () => void;
   onRestart: () => void;
 };
 
-export function MatchScreen({ restaurant, onContinue, onRestart }: Props) {
+export function MatchScreen({ restaurant, members, isHost, onContinue, onRestart }: Props) {
   const dialog = useRef<HTMLDivElement>(null);
   useEffect(() => {
     dialog.current?.focus({ preventScroll: true });
@@ -84,14 +86,13 @@ export function MatchScreen({ restaurant, onContinue, onRestart }: Props) {
             <RestaurantCard r={restaurant} compact />
           </div>
 
-          <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm font-bold">
-            <span className="rounded-full bg-sun px-2.5 py-1">🙋 Toi</span>
-            {DEMO_FRIENDS.map((f) => (
-              <span key={f.name} className="rounded-full bg-sun px-2.5 py-1">
-                {f.emoji} {f.name}
+          <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-sm font-bold">
+            {members.map((m) => (
+              <span key={m.id} className="rounded-full bg-sun px-2.5 py-1">
+                {m.emoji} {m.name}
               </span>
             ))}
-            <span className="w-full text-xs font-medium text-ink-soft">ont tous dit oui (démo)</span>
+            <span className="w-full text-xs font-medium text-ink-soft">ont tous dit oui</span>
           </p>
 
           {restaurant.phone || restaurant.website ? (
@@ -116,9 +117,11 @@ export function MatchScreen({ restaurant, onContinue, onRestart }: Props) {
             <Button variant="secondary" onClick={onContinue}>
               Continuer à swiper
             </Button>
-            <Button variant="ghost" onClick={onRestart} className="!min-h-11 !text-base">
-              Recommencer à zéro
-            </Button>
+            {isHost ? (
+              <Button variant="ghost" onClick={onRestart} className="!min-h-11 !text-base">
+                Recommencer à zéro
+              </Button>
+            ) : null}
           </div>
         </motion.div>
       </div>

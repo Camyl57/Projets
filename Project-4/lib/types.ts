@@ -46,14 +46,27 @@ export type Restaurant = {
 /** `google` = vrais restos (Google Places), `demo` = restos d'exemple générés. */
 export type RestaurantSource = "google" | "demo";
 
+/** Un groupe tel que le serveur le partage à tous ses membres. */
 export type Group = GroupDraft & {
   code: string;
-  createdAt: number;
-  /** Liste figée au premier chargement : les votes s'y réfèrent par identifiant. */
-  restaurants?: Restaurant[];
-  restaurantsSource?: RestaurantSource;
-  /** Tes votes : identifiant du resto → true (oui) / false (non). */
-  votes?: Record<string, boolean>;
-  /** Resto sur lequel tout le monde est d'accord, s'il y en a un. */
-  matchId?: string | null;
+  hostId: string;
+  /** `lobby` = salon d'attente (on peut rejoindre), `swiping` = swipe lancé. */
+  status: "lobby" | "swiping";
+  /** Liste figée : les votes s'y réfèrent par identifiant. `null` tant qu'elle n'est pas chargée. */
+  restaurants: Restaurant[] | null;
+  restaurantsSource: RestaurantSource | null;
+  /** Dernier resto approuvé par tous les membres. */
+  matchId: string | null;
 };
+
+export type Member = {
+  id: string;
+  userId: string;
+  name: string;
+  emoji: string;
+  isHost: boolean;
+  votedCount: number;
+};
+
+/** Prénom et avatar choisis sur cet appareil. */
+export type Profile = { name: string; emoji: string };
