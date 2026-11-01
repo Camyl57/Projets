@@ -269,9 +269,23 @@
   }
 
   // ---------- Rideau d'entrée (une fois par session, page d'accueil) ----------
+  // Accueil : toujours démarrer tout en haut, à chaque chargement
+  if (document.querySelector('.hero')) {
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+    var top0 = function () {
+      root.style.scrollBehavior = 'auto';
+      window.scrollTo(0, 0);
+      setTimeout(function () { root.style.scrollBehavior = ''; }, 60);
+    };
+    top0();
+    window.addEventListener('load', top0);
+    window.addEventListener('pageshow', function (e) { if (e.persisted) top0(); });
+  }
+
+  // ---------- Rideau d'entrée (à chaque chargement de l'accueil) ----------
   if (!reduce && document.querySelector('.hero')) {
     var seen = false;
-    try { seen = sessionStorage.getItem('intro') === '1'; sessionStorage.setItem('intro', '1'); } catch (e) {}
     if (!seen) {
       var cur = document.createElement('div');
       cur.className = 'curtain'; cur.setAttribute('aria-hidden', 'true');
