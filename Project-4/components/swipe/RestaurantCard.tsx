@@ -34,6 +34,11 @@ export function RestaurantCard({ r, compact = false }: { r: Restaurant; compact?
           </p>
         ) : null}
         {!compact && r.address ? <p className="line-clamp-2 text-sm text-ink-soft">{r.address}</p> : null}
+        {!compact && r.hoursToday ? (
+          <p className="text-sm font-semibold text-ink-soft">
+            <span aria-hidden>🕒</span> Aujourd&apos;hui : {r.hoursToday}
+          </p>
+        ) : null}
         {r.tags.length ? (
           <ul className="mt-auto flex flex-wrap gap-2" aria-label="Points forts">
             {r.tags.map((t) => (

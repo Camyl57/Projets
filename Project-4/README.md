@@ -65,7 +65,18 @@ Les restos viennent de **Google Places API (New)**, appelée **côté serveur** 
 5. Dans `.env.local` : `GOOGLE_PLACES_API_KEY=ta_clé`.
 6. Relancer `npm run dev`. Sans clé, l'hôte voit un message clair et peut passer à des restos d'exemple.
 
-**Coût** : on demande la note, le prix et le téléphone, ce qui relève de la tarification « Enterprise » de *Nearby Search* (avec un quota gratuit mensuel). Un groupe consomme 2 appels (recherche générale + cuisines choisies), 4 si peu de résultats. Les résultats sont gardés quelques minutes côté serveur et la route limite chaque IP à 12 recherches par minute. Vérifier la grille tarifaire actuelle de Google avant de partager le site largement.
+### Fiabilité des restos
+
+Google range parfois dans « restaurant » des lieux qui n'en sont pas, ou garde des fiches de commerces fermés ou fantômes. `lib/places/google.ts` écarte donc, avant le swipe :
+
+- les fiches qui ne sont pas explicitement **« en activité »** (fermées définitivement ou temporairement, ou statut absent) ;
+- les lieux qui ne sont pas des restos (station-service, hôtel, supermarché…) ;
+- les fiches sans note ou avec **moins de 15 avis**, sans horaires, ou **fermées aujourd'hui** ;
+- les fiches **« livraison seulement »** et les marques qui **partagent la même adresse** (cuisines fantômes) : seule la plus établie est gardée.
+
+Les horaires du jour sont affichés sur la carte. Dans une petite ville où trop peu de fiches passent ces règles, elles sont assouplies (3 avis minimum, horaires facultatifs) plutôt que de ne rien proposer. Google reste la source : une fiche fermée mais encore « en activité » chez eux peut passer. Une piste pour la suite : un bouton « signaler un resto fermé » qui le retire du groupe.
+
+**Coût** : on demande la note, le prix, le téléphone et les horaires, ce qui relève de la tarification « Enterprise » de *Nearby Search* (avec un quota gratuit mensuel). Un groupe consomme 2 appels (recherche générale + cuisines choisies), 4 si peu de résultats. Les résultats sont gardés quelques minutes côté serveur et la route limite chaque IP à 12 recherches par minute. Vérifier la grille tarifaire actuelle de Google avant de partager le site largement.
 
 **Conditions d'utilisation** : l'écran de swipe affiche « données Google Maps ». La liste des restos est conservée dans la base le temps du groupe (24 h au maximum). Si l'application grandit, ne stocker que les identifiants de lieux (`place id`) et redemander les détails à Google.
 

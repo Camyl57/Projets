@@ -41,6 +41,8 @@ export type Restaurant = {
   website?: string;
   /** Lien direct vers la fiche sur la carte (sinon on construit une recherche). */
   mapsUrl?: string;
+  /** Horaires du jour au moment de la recherche, par exemple « 12:00 – 14:30, 19:00 – 22:30 ». */
+  hoursToday?: string;
 };
 
 /** `google` = vrais restos (Google Places), `demo` = restos d'exemple générés. */

@@ -45,6 +45,8 @@ export const GOOGLE_TYPE_TO_CUISINE: Record<string, string> = {
   mexican_restaurant: "mexicain",
   indian_restaurant: "indien",
   turkish_restaurant: "kebab",
+  kebab_shop: "kebab",
+  taco_restaurant: "mexicain",
   middle_eastern_restaurant: "kebab",
   french_restaurant: "francais",
   lebanese_restaurant: "libanais",
@@ -63,6 +65,15 @@ export const GOOGLE_TYPE_TO_CUISINE: Record<string, string> = {
   coffee_shop: "cafe",
   cafe: "cafe",
 };
+
+/**
+ * Ordre de précision quand une fiche a plusieurs types : « burger » dit plus qu'un « fast-food »,
+ * qui dit plus qu'un « café ». Le premier de la liste l'emporte.
+ */
+export const CUISINE_PRIORITY = [
+  "burger", "pizza", "italien", "asiatique", "sushi", "mexicain", "indien", "kebab", "libanais", "francais", "vegetarien",
+  "grill", "mer", "sandwich", "fastfood", "dessert", "cafe", "autre",
+];
 
 /** Cuisine choisie dans le parcours → types Google à interroger en plus de la recherche générale. */
 export const CUISINE_TO_GOOGLE_TYPES: Record<string, string[]> = {

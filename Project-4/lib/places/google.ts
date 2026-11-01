@@ -1,6 +1,6 @@
 import "server-only";
 import { cacheLife } from "next/cache";
-import { CUISINE_TO_GOOGLE_TYPES, GOOGLE_TYPE_TO_CUISINE, styleFor } from "../cuisineStyles";
+import { CUISINE_PRIORITY, CUISINE_TO_GOOGLE_TYPES, GOOGLE_TYPE_TO_CUISINE, styleFor } from "../cuisineStyles";
 import { distanceMeters } from "../geo";
 import type { BudgetId, Coords, GroupDraft, Restaurant } from "../types";
 
@@ -30,6 +30,7 @@ const FIELD_MASK = [
   "places.nationalPhoneNumber",
   "places.websiteUri",
   "places.currentOpeningHours.openNow",
+  "places.regularOpeningHours.weekdayDescriptions",
 ].join(",");
 
 export const RESULT_COUNT = 12;
@@ -53,7 +54,48 @@ export type GooglePlace = {
   nationalPhoneNumber?: string;
   websiteUri?: string;
   currentOpeningHours?: { openNow?: boolean };
+  /** Sept lignes (lundi → dimanche), par exemple « lundi: 12:00 – 14:30, 19:00 – 22:30 » ou « mardi: Fermé ». */
+  regularOpeningHours?: { weekdayDescriptions?: string[] };
 };
+
+
+// ------------------------------------------------------------- fiabilité
+
+/** Combien d'avis minimum pour considérer une fiche « installée » (les cuisines fantômes en ont très peu). */
+const MIN_REVIEWS_STRICT = 15;
+const MIN_REVIEWS_RELAXED = 3;
+/** Si les règles strictes laissent moins de résultats, on les assouplit (petites villes). */
+const MIN_STRICT_RESULTS = 6;
+
+const FOOD_PRIMARY = new Set(["restaurant", "meal_takeaway", "sandwich_shop", "steak_house", "bar_and_grill", "food_court"]);
+const DESSERT_PRIMARY = new Set(["bakery", "dessert_shop", "ice_cream_shop", "cafe", "coffee_shop", "dessert_restaurant", "cake_shop"]);
+/** Types qui, sans type principal fiable, trahissent un lieu qui n'est pas un resto (station-service, hôtel, supermarché…). */
+const NOT_A_RESTAURANT = new Set(["gas_station", "lodging", "hotel", "supermarket", "convenience_store", "grocery_store", "store", "shopping_mall", "department_store"]);
+
+/** Vrai resto, et non une station-service ou un hôtel que Google range aussi dans « restaurant ». */
+function isFoodPlace(p: GooglePlace, wantsDessert: boolean): boolean {
+  const primary = p.primaryType ?? "";
+  if (primary) {
+    if (primary.endsWith("_restaurant") || FOOD_PRIMARY.has(primary)) return true;
+    return wantsDessert && DESSERT_PRIMARY.has(primary);
+  }
+  const types = p.types ?? [];
+  return types.includes("restaurant") && !types.some((t) => NOT_A_RESTAURANT.has(t));
+}
+
+const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+/** Ligne d'horaires du jour (fuseau de Paris) : « 12:00 – 14:30, 19:00 – 22:30 » ou « Fermé ». */
+export function hoursForToday(p: GooglePlace, now: Date = new Date()): string | undefined {
+  const lines = p.regularOpeningHours?.weekdayDescriptions;
+  if (!lines || lines.length !== 7) return undefined;
+  const day = now.toLocaleDateString("en-US", { weekday: "long", timeZone: "Europe/Paris" });
+  const line = lines[WEEKDAYS.indexOf(day)];
+  if (!line) return undefined;
+  return line.slice(line.indexOf(":") + 1).trim().replace(/[\u202f\u2009]/g, " ");
+}
+
+const isClosedToday = (hours?: string) => hours !== undefined && /ferm/i.test(hours) && !/\d/.test(hours);
 
 // ---------------------------------------------------------------- appel API
 
@@ -140,11 +182,14 @@ function readPrice(p: GooglePlace): { label?: string; bands: BudgetId[] } {
   }
 }
 
-function cuisineOf(p: GooglePlace): string {
-  for (const t of [p.primaryType, ...(p.types ?? [])]) {
-    if (t && GOOGLE_TYPE_TO_CUISINE[t]) return GOOGLE_TYPE_TO_CUISINE[t];
+/** Toutes les cuisines que Google associe à la fiche, de la plus précise à la plus vague. */
+function cuisinesOf(p: GooglePlace): string[] {
+  const found = new Set<string>();
+  for (const type of [p.primaryType, ...(p.types ?? [])]) {
+    const id = type ? GOOGLE_TYPE_TO_CUISINE[type] : undefined;
+    if (id) found.add(id);
   }
-  return "autre";
+  return [...found].sort((a, b) => CUISINE_PRIORITY.indexOf(a) - CUISINE_PRIORITY.indexOf(b));
 }
 
 function tagsOf(p: GooglePlace): string[] {
@@ -159,20 +204,46 @@ function tagsOf(p: GooglePlace): string[] {
   return tags.slice(0, 3);
 }
 
-type Candidate = { restaurant: Restaurant; bands: BudgetId[] };
+type Candidate = { restaurant: Restaurant; bands: BudgetId[]; closedToday: boolean; cuisines: string[] };
 
-export function normalizePlace(p: GooglePlace, origin: Coords): Candidate | null {
+type Rules = {
+  /** Règles strictes : avis, horaires et ouverture du jour exigés. Sinon : version assouplie pour les petites villes. */
+  strict: boolean;
+  wantsDessert: boolean;
+  /** Cuisines choisies par le groupe : si la fiche en a une, c'est celle qu'on affiche. */
+  selected: string[];
+  now: Date;
+};
+
+export function normalizePlace(p: GooglePlace, origin: Coords, rules: Rules): Candidate | null {
   const name = p.displayName?.text?.trim();
   if (!p.id || !name || !p.location) return null;
-  if (p.businessStatus && p.businessStatus !== "OPERATIONAL") return null;
+  // Seules les fiches explicitement « en activité » : un statut absent ou « fermé » est écarté.
+  if (p.businessStatus !== "OPERATIONAL") return null;
+  if (!isFoodPlace(p, rules.wantsDessert)) return null;
+
+  // Une fiche installée a des avis. Les cuisines fantômes de livraison en ont très peu, ou aucun.
+  const reviews = p.userRatingCount ?? 0;
+  if (p.rating === undefined || reviews < (rules.strict ? MIN_REVIEWS_STRICT : MIN_REVIEWS_RELAXED)) return null;
+
+  // Un resto où l'on va manger n'est pas « livraison seulement » : c'est la signature des cuisines fantômes.
+  const types = p.types ?? [];
+  if (rules.strict && types.includes("meal_delivery") && !types.includes("meal_takeaway")) return null;
+
+  const hours = hoursForToday(p, rules.now);
+  const closedToday = isClosedToday(hours);
+  if (rules.strict && (hours === undefined || closedToday)) return null;
 
   const coords = { lat: p.location.latitude, lng: p.location.longitude };
-  const cuisineId = cuisineOf(p);
+  const cuisines = cuisinesOf(p);
+  const cuisineId = cuisines.find((c) => rules.selected.includes(c)) ?? cuisines[0] ?? "autre";
   const style = styleFor(cuisineId);
   const price = readPrice(p);
 
   return {
     bands: price.bands,
+    closedToday,
+    cuisines,
     restaurant: {
       id: `g-${p.id}`,
       name,
@@ -190,6 +261,7 @@ export function normalizePlace(p: GooglePlace, origin: Coords): Candidate | null
       phone: p.nationalPhoneNumber,
       website: p.websiteUri,
       mapsUrl: p.googleMapsUri,
+      hoursToday: hours,
     },
   };
 }
@@ -201,7 +273,7 @@ function score(c: Candidate, draft: GroupDraft): number {
   const r = c.restaurant;
   let s = 0;
   // La cuisine demandée prime sur le reste : on a choisi « sushi », pas « le moins cher ».
-  if (draft.cuisines.length) s += draft.cuisines.includes(r.cuisineId) ? 5 : 0;
+  if (draft.cuisines.length) s += c.cuisines.some((id) => draft.cuisines.includes(id)) ? 5 : 0;
   if (c.bands.length === 0) s += 1; // prix inconnu : on ne l'écarte pas
   else if (c.bands.includes(draft.budget)) s += 3;
   else {
@@ -212,24 +284,45 @@ function score(c: Candidate, draft: GroupDraft): number {
   if (r.rating) s += (r.rating - 3.5) * 1.2;
   if ((r.reviews ?? 0) >= 50) s += 0.5;
   s -= (r.distance / 1000) * 0.4;
+  if (c.closedToday) s -= 6; // ne servira qu'en dernier recours (règles assouplies)
   return s;
 }
 
 /** Garde les meilleurs restos, sans doublons, du plus pertinent au moins pertinent. */
-export function selectRestaurants(places: GooglePlace[], draft: GroupDraft, origin: Coords): Restaurant[] {
-  const seen = new Set<string>();
-  const candidates: Candidate[] = [];
-  for (const p of places) {
-    if (seen.has(p.id)) continue;
-    seen.add(p.id);
-    const c = normalizePlace(p, origin);
-    if (c) candidates.push(c);
-  }
-  return candidates
-    .map((c) => ({ c, s: score(c, draft) }))
-    .sort((a, b) => b.s - a.s)
-    .slice(0, RESULT_COUNT)
-    .map(({ c }) => c.restaurant);
+export function selectRestaurants(places: GooglePlace[], draft: GroupDraft, origin: Coords, now: Date = new Date()): Restaurant[] {
+  const wantsDessert = draft.cuisines.includes("dessert");
+  const unique = [...new Map(places.map((p) => [p.id, p])).values()];
+
+  const pick = (strict: boolean) => {
+    const found = unique
+      .map((p) => normalizePlace(p, origin, { strict, wantsDessert, selected: draft.cuisines, now }))
+      .filter((c): c is Candidate => c !== null);
+
+    // Plusieurs « restos » à la même adresse = une cuisine partagée qui vend sous plusieurs marques :
+    // on ne garde que la fiche la plus établie (le plus d'avis).
+    const byAddress = new Map<string, Candidate>();
+    const kept: Candidate[] = [];
+    for (const c of found) {
+      const key = c.restaurant.address.trim().toLowerCase();
+      if (!key) {
+        kept.push(c);
+        continue;
+      }
+      const other = byAddress.get(key);
+      if (!other || (c.restaurant.reviews ?? 0) > (other.restaurant.reviews ?? 0)) byAddress.set(key, c);
+    }
+    kept.push(...byAddress.values());
+
+    return kept
+      .map((c) => ({ c, s: score(c, draft) }))
+      .sort((a, b) => b.s - a.s)
+      .slice(0, RESULT_COUNT)
+      .map(({ c }) => c.restaurant);
+  };
+
+  const strict = pick(true);
+  // Petite ville : trop peu de fiches passent les règles strictes, on assouplit plutôt que de ne rien proposer.
+  return strict.length >= MIN_STRICT_RESULTS ? strict : pick(false);
 }
 
 // ------------------------------------------------------------- point d'entrée
@@ -241,7 +334,7 @@ export async function findRestaurants(draft: GroupDraft): Promise<Restaurant[]> 
   const lngKey = Math.round(origin.lng * 1000) / 1000;
 
   const cuisineTypes = [...new Set(draft.cuisines.flatMap((c) => CUISINE_TO_GOOGLE_TYPES[c] ?? []))];
-  let places: GooglePlace[] = [];
+  let best: Restaurant[] = [];
 
   for (const radius of RADII) {
     const calls: Promise<GooglePlace[]>[] = [fetchNearby(latKey, lngKey, radius, "restaurant")];
@@ -249,9 +342,10 @@ export async function findRestaurants(draft: GroupDraft): Promise<Restaurant[]> 
       // Si un type est refusé par Google, on garde quand même la recherche générale.
       calls.push(fetchNearby(latKey, lngKey, radius, cuisineTypes.join(",")).catch(() => []));
     }
-    places = (await Promise.all(calls)).flat();
-    if (new Set(places.map((p) => p.id)).size >= MIN_RESULTS) break;
+    best = selectRestaurants((await Promise.all(calls)).flat(), draft, origin);
+    // On élargit la zone tant que trop peu de fiches fiables ont passé les filtres.
+    if (best.length >= MIN_RESULTS) break;
   }
 
-  return selectRestaurants(places, draft, origin);
+  return best;
 }
