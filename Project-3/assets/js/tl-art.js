@@ -8,9 +8,9 @@
  * Mouvement réduit : les schémas restent visibles, statiques, sans paquets.
  */
 (function () {
-  var small = document.querySelector('.tl-art');
+  var figs = [].slice.call(document.querySelectorAll('.tl-art'));
   var tl = document.querySelector('.timeline');
-  if (!small || !tl) return;
+  if (!figs.length && !tl) return;
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var desk = window.matchMedia('(min-width: 1000px)');
   var NS = 'http://www.w3.org/2000/svg';
@@ -67,19 +67,21 @@
     } else { scene.inView = true; sync(); }
   }
 
-  // ---------- Petit schéma (téléphone / tablette, ou sans mise en page large) ----------
-  var smallLayer = small.querySelector('.tl-packets');
-  if (smallLayer && !reduce) {
+  // ---------- Petits schémas (§ 03 sur téléphone / tablette, § 07 Contact) ----------
+  var DEFAULT_ROUTES = 'P,R,FW,C;A,R,FW,S;S,FW,R,P;C,FW,R,A';
+  figs.forEach(function (fig) {
+    var layer = fig.querySelector('.tl-packets');
+    if (!layer || reduce) return;
     var node = {};
-    [].forEach.call(small.querySelectorAll('[data-node]'), function (g) {
+    [].forEach.call(fig.querySelectorAll('[data-node]'), function (g) {
       node[g.getAttribute('data-node')] = [+g.getAttribute('data-x'), +g.getAttribute('data-y')];
     });
-    var routes = [['P', 'R', 'FW', 'C'], ['A', 'R', 'FW', 'S'], ['S', 'FW', 'R', 'P'], ['C', 'FW', 'R', 'A']];
+    var routes = (fig.getAttribute('data-routes') || DEFAULT_ROUTES).split(';').map(function (r) { return r.split(','); });
     var sp = routes.map(function (r, i) {
-      return makePacket(smallLayer, r.map(function (k) { return node[k]; }), i * 2.2, 1.6);
+      return makePacket(layer, r.map(function (k) { return node[k]; }), i * 2.2, 1.6);
     });
-    watch({ art: small, layer: smallLayer, packets: sp, inView: false });
-  }
+    watch({ art: fig, layer: layer, packets: sp, inView: false });
+  });
 
   // ---------- Grand schéma (ordinateur) : toute la hauteur de la frise ----------
   var tall = null, tallScene = null, builtFor = '';
@@ -167,6 +169,8 @@
     }
     if (desk.matches) { builtFor = ''; buildTall(); }
   }
-  setup();
-  if (desk.addEventListener) desk.addEventListener('change', function () { setup(); });
+  if (tl) {
+    setup();
+    if (desk.addEventListener) desk.addEventListener('change', function () { setup(); });
+  }
 })();

@@ -109,7 +109,7 @@
   var groups = [
     ['section .eyebrow, section > .wrap > .body, .about-grid > div, .about-grid > figure', 0],
     ['.focus > div', 1], ['.grid > .project', 1], ['.timeline > .item', 1], ['.others', 0],
-    ['.skills-ui', 0], ['.cert-grid > .cert', 1], ['.langs > li', 1], ['.contact-list > li', 1], ['.stats', 0],
+    ['.skills-ui', 0], ['#apropos .topo', 0], ['.contact-aside', 0], ['.cert-grid > .cert', 1], ['.langs > li', 1], ['.contact-list > li', 1], ['.stats', 0],
     ['.detail section, .detail .pager', 1]
   ];
   var els = [];
@@ -462,6 +462,33 @@
       pb.addEventListener('click', openPal);
       if (/Mac|iPhone|iPad/.test(navigator.platform || '')) { var k = pb.querySelector('kbd'); if (k) k.textContent = '⌘'; }
     }
+  })();
+
+  // ---------- Liens mailto : sans messagerie configurée, l'adresse est copiée et une bulle l'indique ----------
+  (function () {
+    var done = false;
+    function flag() { done = true; }
+    function notify(mail) {
+      var toast = document.querySelector('.toast');
+      if (!toast) { toast = document.createElement('div'); toast.className = 'toast'; toast.setAttribute('role', 'status'); document.body.appendChild(toast); }
+      toast.textContent = 'Aucune messagerie détectée : adresse copiée (' + mail + ')';
+      toast.classList.add('on');
+      setTimeout(function () { toast.classList.remove('on'); }, 4200);
+    }
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href^="mailto:"]');
+      if (!a || e.defaultPrevented) return;
+      var mail = a.getAttribute('href').replace(/^mailto:/, '').split('?')[0];
+      done = false;
+      window.addEventListener('blur', flag, { once: true });
+      document.addEventListener('visibilitychange', flag, { once: true });
+      setTimeout(function () {
+        window.removeEventListener('blur', flag); document.removeEventListener('visibilitychange', flag);
+        if (done) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(mail).then(function () { notify(mail); }, function () { notify(mail); });
+        else notify(mail);
+      }, 1600);
+    });
   })();
 
   // ---------- Liens du menu : le texte se « brouille » au survol ----------

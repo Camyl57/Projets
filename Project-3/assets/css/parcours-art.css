@@ -14,7 +14,7 @@
 /* ordinateur : sans le grand schéma (JavaScript absent), le petit schéma occupe la colonne vide, aligné sur la 3e entrée */
 @media (min-width: 1000px) {
   .item.has-art > :not(.tl-art) { max-width: calc(100% - var(--art-w) - 36px); }
-  .tl-art { position: absolute; top: -6px; right: 0; margin: 0; }
+  .has-art > .tl-art { position: absolute; top: -6px; right: 0; margin: 0; }
 }
 
 /* ordinateur avec JavaScript : un grand schéma occupe toute la hauteur de la frise, à droite */
@@ -22,7 +22,7 @@
 @media (min-width: 1000px) {
   html.tl-tall-on .timeline { --art-w: 360px; }
   html.tl-tall-on .timeline > .item > :not(.tl-art) { max-width: calc(100% - var(--art-w) - 36px); }
-  html.tl-tall-on .tl-art { display: none; }
+  html.tl-tall-on .has-art > .tl-art { display: none; }
   .tl-tall {
     display: block; position: absolute; top: 0; bottom: 0; right: 0; width: var(--art-w, 360px); margin: 0;
     border: 1px solid var(--line); border-radius: 14px; overflow: hidden;

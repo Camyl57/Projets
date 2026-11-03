@@ -124,7 +124,7 @@ Somme de contrôle (SHA-256 tronqué) de la liste triée de tous les textes de c
 | panneaux de compétences (.skill-panel) | 4 | 4 | +0 | ✓ |
 | attestations (.cert) | 4 | 4 | +0 | ✓ |
 | langues (.langs li) | 6 | 6 | +0 | ✓ |
-| liens de contact (.contact-list a) | 4 | 4 | +0 | ✓ |
+| liens de contact (.contact-list a) | 4 | 3 | -1 | ✓ voulu (adresse e-mail non cliquable, demande § 07) |
 | téléchargement du CV (a[download]) | 1 | 1 | +0 | ✓ |
 | pied de page (footer) | 1 | 1 | +0 | ✓ |
 | sections numérotées (.eyebrow) | 7 | 7 | +0 | ✓ |
@@ -148,13 +148,15 @@ Somme de contrôle (SHA-256 tronqué) de la liste triée de tous les textes de c
 
 | Page | Textes avant | Textes après | Absents après | Liens avant → après | Images | Éléments `<body>` avant → après |
 | --- | ---: | ---: | ---: | ---: | :---: | ---: |
-| `index.html` | 265 | 311 | 0 | 22 → 22 | = | 469 → 570 |
+| `index.html` | 265 | 318 | 0 | 22 → 22 | = | 469 → 605 |
 | `projets/index.html` | 46 | 67 | 0 | 14 → 14 | = | 77 → 110 |
 | `projets/symfony-docker.html` | 43 | 64 | 0 | 13 → 13 | = | 76 → 109 |
 | `projets/jeu-2048.html` | 38 | 59 | 0 | 14 → 14 | = | 70 → 103 |
 | `projets/portfolio.html` | 41 | 62 | 0 | 14 → 14 | = | 73 → 106 |
 
 Seuls remplacements de texte, documentés et voulus : les numéros de section `§ 01 … § 07` deviennent des numéros de hop (`hop 01 … hop 07`), dans la page d'accueil et dans la palette Ctrl+K (`§ NN` → `hop NN`).
+
+Écarts **voulus par la demande** (§ 07 Contact) : (1) l’adresse e-mail reste affichée mais n’est plus un lien cliquable (liens de contact 4 → 3) ; (2) les boutons « Contact » du menu (toutes les pages) et « Me contacter » du hero pointent vers `mailto:camyl.khebache@gmail.com` au lieu de `#contact` ; (3) nouveau bouton « Cliquez ici pour me contacter » (mailto). Aucun texte n’a été retiré.
 
 ### 2.3 Libellés de navigation
 
@@ -180,7 +182,10 @@ Les libellés d'origine **restent visibles** (À propos, Projets, Parcours, Comp
 - 17 latences animées au total (vibrent de 1 à 2 ms ; figées si le mouvement est réduit)
 - Animations (étape 2), éléments décoratifs créés par JavaScript uniquement avec le mouvement normal, tous aria-hidden et retirés ou masqués si le mouvement est réduit : écran d'entrée « Établir la connexion » (page d'accueil, 1re visite de la session, retiré après ~2 s ; remplace l'ancien rideau), tampon « CONNECTED » (retiré après 2,4 s), indicateur de latence « Hop n/7 » en bas d'écran (1 élément fixe + 24 barres), volet de transition + paquet (créés à chaque saut de section, retirés après 1,1 s). Aucun contenu du site n'est modifié.
 - Fond animé (étape 3), éléments décoratifs aria-hidden créés par JavaScript sur toutes les pages : 1 conteneur fixe « .bg-scene » = 3 photos de fond (WebP, 3 fichiers dans assets/img/bg, chargées en différé, masquables via Ctrl+K), 1 voile de lisibilité, 1 canvas animé (nœuds, liens, paquets ; statique si le mouvement est réduit) et une grille CSS. Les sections alternées et le hero deviennent légèrement translucides ; la grille propre au hero est remplacée par la grille globale du fond. 1 entrée ajoutée à la palette Ctrl+K : « Afficher / masquer les photos de fond ». 1 fichier README.md (crédits des images).
-- § 03 Parcours, schémas télécom / cybersécurité (figures aria-hidden, SVG), à côté de la frise : sur ordinateur (≥ 1000 px), 1 grand schéma créé par JavaScript occupe toute la hauteur de la frise à droite (7 équipements reliés aux entrées par une dorsale : antenne 5G, serveur, pare-feu avec bouclier et cadenas, poste, routeur, cloud, TLS ; 26 liaisons ; libellés décoratifs « 5G », « SERVEUR », « PARE-FEU », « POSTE », « ROUTEUR », « CLOUD », « TLS », « // liaison sécurisée » ; une vingtaine de paquets créés par JavaScript quand le mouvement est normal). Sur téléphone et tablette, 1 petit schéma (6 nœuds) s'affiche sous la 3e entrée « BUT Informatique ». Les 7 entrées de la frise, leurs dates, intitulés et descriptions sont inchangés (la 3e entrée reçoit seulement la classe « has-art » ; le texte des entrées se replie un peu plus tôt sur ordinateur pour laisser la colonne de droite libre).
+- § 03 Parcours, schémas télécom / cybersécurité (figures aria-hidden, SVG), à côté de la frise : sur ordinateur (≥ 1000 px), 1 grand schéma créé par JavaScript occupe toute la hauteur de la frise à droite (7 équipements reliés aux entrées par une dorsale : antenne 5G, serveur, pare-feu avec bouclier et cadenas, poste, routeur, cloud, TLS ; 26 liaisons ; libellés décoratifs « 5G », « SERVEUR », « PARE-FEU », « POSTE », « ROUTEUR », « CLOUD », « TLS », « // liaison sécurisée » ; une vingtaine de paquets créés par JavaScript quand le mouvement est normal). Sur téléphone et tablette, 1 petit schéma (11 nœuds) s'affiche sous la 3e entrée « BUT Informatique ». Les 7 entrées de la frise, leurs dates, intitulés et descriptions sont inchangés (la 3e entrée reçoit seulement la classe « has-art » ; le texte des entrées se replie un peu plus tôt sur ordinateur pour laisser la colonne de droite libre).
+- § 07 Contact (étape 4) : 1 bloc de droite « .contact-aside » ajouté (sous les coordonnées sur téléphone) avec 1 bouton « Cliquez ici pour me contacter » (lien mailto:camyl.khebache@gmail.com) et 1 schéma réseau / cybersécurité décoratif (aria-hidden : 5 nœuds POSTE, ROUTEUR, PARE-FEU avec bouclier et cadenas, CLOUD, E-MAIL ; 4 liaisons ; légende « // message chiffré » ; 4 paquets créés par JavaScript si le mouvement est normal). Les boutons « Contact » du menu (5 pages) et « Me contacter » du hero ouvrent maintenant ce même lien mailto (ils pointaient vers #contact).
+- Liens mailto (étape 4) : si aucune messagerie ne s'ouvre au clic (la fenêtre garde le focus 1,6 s), l'adresse est copiée et la bulle existante (« toast ») affiche « Aucune messagerie détectée : adresse copiée ». Aucun élément ajouté dans la page.
+- § 01 À propos (étape 4) : le bloc « Réseaux / Cloud / Automatisation » et le schéma réseau sont sortis de la colonne de droite dans le HTML (ils suivent désormais le bloc de profil, au lieu d'être dans la même colonne) pour être centrés sur la page, avec 56 px d'espace sous le bloc de profil. Contenu et nombre d'éléments identiques.
 - Animation d'entrée : jouée à chaque nouvel onglet ou nouvelle session, pas au rechargement de l'onglet (sessionStorage) ; jouée normalement si le stockage est indisponible.
 - Animations (étape 2), CSS seul : voyant de statut après le titre du hero (pseudo-élément), chute des hops, tableau d'affichage, rotations au survol. 6 attributs style --i:N ajoutés sur les <li> des hops de chaque page.
 - Purement CSS (aucun élément HTML ajouté) : en-tête « --- camyl.dev ping statistics --- » du bloc de chiffres, numéros « 01 ▸ … 07 ▸ » devant les dates du parcours, adresses IP sous les 5 nœuds de l'illustration réseau, « › » devant les libellés de contact, flèches « ▸ » du bandeau de technologies
@@ -189,22 +194,22 @@ Les libellés d'origine **restent visibles** (À propos, Projets, Parcours, Comp
 
 | Largeur · thème | Page | Avant | Après | Δ | Verdict |
 | --- | --- | ---: | ---: | ---: | :---: |
-| 1280px light | `index.html` | 7238 | 7387 | +149 | ✓ |
+| 1280px light | `index.html` | 7238 | 7426 | +188 | ✓ |
 | 1280px light | `projets/index.html` | 1159 | 1188 | +29 | ✓ |
 | 1280px light | `projets/symfony-docker.html` | 1661 | 1690 | +29 | ✓ |
 | 1280px light | `projets/jeu-2048.html` | 1508 | 1538 | +30 | ✓ |
 | 1280px light | `projets/portfolio.html` | 1629 | 1658 | +29 | ✓ |
-| 1280px dark | `index.html` | 7238 | 7387 | +149 | ✓ |
+| 1280px dark | `index.html` | 7238 | 7426 | +188 | ✓ |
 | 1280px dark | `projets/index.html` | 1159 | 1188 | +29 | ✓ |
 | 1280px dark | `projets/symfony-docker.html` | 1661 | 1690 | +29 | ✓ |
 | 1280px dark | `projets/jeu-2048.html` | 1508 | 1538 | +30 | ✓ |
 | 1280px dark | `projets/portfolio.html` | 1629 | 1658 | +29 | ✓ |
-| 390px light | `index.html` | 9486 | 9950 | +464 | ✓ |
+| 390px light | `index.html` | 9486 | 10340 | +854 | ✓ |
 | 390px light | `projets/index.html` | 1676 | 1724 | +48 | ✓ |
 | 390px light | `projets/symfony-docker.html` | 2020 | 2069 | +49 | ✓ |
 | 390px light | `projets/jeu-2048.html` | 1679 | 1727 | +48 | ✓ |
 | 390px light | `projets/portfolio.html` | 1924 | 1972 | +48 | ✓ |
-| 390px dark | `index.html` | 9486 | 9950 | +464 | ✓ |
+| 390px dark | `index.html` | 9486 | 10340 | +854 | ✓ |
 | 390px dark | `projets/index.html` | 1676 | 1724 | +48 | ✓ |
 | 390px dark | `projets/symfony-docker.html` | 2020 | 2069 | +49 | ✓ |
 | 390px dark | `projets/jeu-2048.html` | 1679 | 1727 | +48 | ✓ |
@@ -214,7 +219,7 @@ Les libellés d'origine **restent visibles** (À propos, Projets, Parcours, Comp
 
 | Page | Avant | Après |
 | --- | --- | --- |
-| `index.html` | `0fc4c3e204a7` | `f2047148b6cc` (différence attendue : numéros de hop + éléments décoratifs ajoutés) |
+| `index.html` | `0fc4c3e204a7` | `a5d6479c39f1` (différence attendue : numéros de hop + éléments décoratifs ajoutés) |
 | `projets/index.html` | `362aadf41813` | `21e07d4387b2` (différence attendue : numéros de hop + éléments décoratifs ajoutés) |
 | `projets/symfony-docker.html` | `878010e8286f` | `03b1917d012b` (différence attendue : numéros de hop + éléments décoratifs ajoutés) |
 | `projets/jeu-2048.html` | `9767bb507f16` | `776e324c768a` (différence attendue : numéros de hop + éléments décoratifs ajoutés) |
