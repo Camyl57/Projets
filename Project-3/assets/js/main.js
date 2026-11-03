@@ -91,12 +91,18 @@
     if (reduce || isNaN(to)) return;
     function step(t) {
       if (!start) start = t;
-      var k = Math.min((t - start) / 1000, 1);
+      var k = Math.min((t - start) / 1200, 1);
       el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3)));
       if (k < 1) requestAnimationFrame(step);
     }
     el.textContent = '0';
     requestAnimationFrame(step);
+  }
+
+  // ---------- Écran d'entrée : la page attend la « connexion » avant de lancer ses animations ----------
+  function whenConnected(fn) {
+    if (root.classList.contains('entry-on')) document.addEventListener('connected', fn, { once: true });
+    else fn();
   }
 
   // ---------- Apparition au défilement (le contenu reste visible sans JavaScript) ----------
@@ -122,7 +128,7 @@
     $$('[data-count]', el).forEach(countUp);
     if (el.hasAttribute('data-reveal')) {
       // une fois l'apparition terminée, on rend la main aux effets de survol
-      setTimeout(function () { el.removeAttribute('data-reveal'); el.classList.remove('in'); }, 1300);
+      setTimeout(function () { el.removeAttribute('data-reveal'); el.classList.remove('in'); }, 1800);
     }
   }
   if (reduce || !('IntersectionObserver' in window)) {
@@ -131,12 +137,13 @@
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) {
         if (!en.isIntersecting) return;
-        io.unobserve(en.target); onEnter(en.target);
+        io.unobserve(en.target);
+        whenConnected(function () { onEnter(en.target); });
       });
     }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
     animated.forEach(function (el) { io.observe(el); });
     var kick = document.querySelector('.kicker');
-    if (kick) scramble(kick);
+    if (kick) whenConnected(function () { scramble(kick); });
   }
 
   // ---------- Survol : halo, inclinaison, boutons magnétiques ----------
@@ -268,8 +275,7 @@
     });
   }
 
-  // ---------- Rideau d'entrée (une fois par session, page d'accueil) ----------
-  // Accueil : toujours démarrer tout en haut, à chaque chargement
+  // ---------- Accueil : toujours démarrer tout en haut, à chaque chargement ----------
   if (document.querySelector('.hero')) {
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     if (location.hash) history.replaceState(null, '', location.pathname + location.search);
@@ -283,17 +289,78 @@
     window.addEventListener('pageshow', function (e) { if (e.persisted) top0(); });
   }
 
-  // ---------- Rideau d'entrée (à chaque chargement de l'accueil) ----------
-  if (!reduce && document.querySelector('.hero')) {
-    var seen = false;
-    if (!seen) {
-      var cur = document.createElement('div');
-      cur.className = 'curtain'; cur.setAttribute('aria-hidden', 'true');
-      cur.innerHTML = '<span>Camyl Khebache</span>';
-      document.body.appendChild(cur);
-      setTimeout(function () { cur.remove(); }, 2300);
-    }
+  // ---------- Transition entre sections : un volet glisse de haut en bas, un paquet le traverse ----------
+  // (l'écran d'entrée « Établir la connexion » est géré par entry.js, qui remplace l'ancien rideau)
+  var wiping = false;
+  var onHome = !!document.querySelector('.hero');
+  function wipeJump(url) {
+    if (reduce || !onHome || wiping || url.length < 2) return false;
+    var t = document.querySelector(url);
+    if (!t) return false;
+    wiping = true;
+    var name = url.slice(1);
+    var w = document.createElement('div');
+    w.className = 'wipe'; w.setAttribute('aria-hidden', 'true');
+    w.innerHTML = '<span class="wipe-label">→ ' + name + '.camyl.lan</span>';
+    var rail = document.createElement('div');
+    rail.className = 'wipe-rail'; rail.setAttribute('aria-hidden', 'true');
+    rail.innerHTML = '<i></i>';
+    document.body.appendChild(w); document.body.appendChild(rail);
+    setTimeout(function () {
+      t.scrollIntoView({ behavior: 'instant' });
+      history.replaceState(null, '', url);
+    }, 550);
+    setTimeout(function () { w.remove(); rail.remove(); wiping = false; }, 1150);
+    return true;
   }
+  if (onHome && !reduce) {
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href^="#"]');
+      if (!a || a.classList.contains('skip') || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      if (wipeJump(a.getAttribute('href'))) e.preventDefault();
+    });
+  }
+
+  // ---------- Tableau d'affichage : les hops se remettent à jour en cascade (60 ms entre lignes) ----------
+  var flipTimer, lastFlip = 0;
+  function flipBoard() {
+    if (reduce || !menu) return;
+    var now = Date.now();
+    if (now - lastFlip < 1500) return;
+    lastFlip = now;
+    clearTimeout(flipTimer);
+    menu.classList.remove('flip');
+    $$('.nh', menu).forEach(function (a, i) { a.style.setProperty('--fi', i); });
+    void menu.offsetWidth;
+    menu.classList.add('flip');
+    flipTimer = setTimeout(function () { menu.classList.remove('flip'); }, 1000);
+  }
+  if (onHome) whenConnected(function () { setTimeout(flipBoard, 1400); });
+
+  // ---------- Indicateur de latence en bas d'écran : se remplit au défilement ----------
+  var PM_BARS = 24, HOP_MS = [2, 5, 9, 14, 21, 27, 33];
+  var meter = null, meterBars = [], meterHop, meterMs, meterShown = false;
+  if (onHome && !reduce) {
+    meter = document.createElement('div');
+    meter.className = 'ping-meter'; meter.setAttribute('aria-hidden', 'true');
+    var bars = '';
+    for (var b = 0; b < PM_BARS; b++) bars += '<i></i>';
+    meter.innerHTML = '<span class="pm-hop">Hop <b>0</b>/7</span><span class="pm-bars">' + bars + '</span><span class="pm-ms">0 ms</span>';
+    document.body.appendChild(meter);
+    meterBars = $$('.pm-bars i', meter);
+    meterHop = meter.querySelector('.pm-hop b');
+    meterMs = meter.querySelector('.pm-ms');
+  }
+  function updateMeter(y0, max, hop) {
+    if (!meter) return;
+    var show = y0 > 240 && !root.classList.contains('entry-on');
+    if (show !== meterShown) { meterShown = show; meter.classList.toggle('show', show); }
+    var filled = max > 0 ? Math.round(Math.min(y0 / max, 1) * PM_BARS) : 0;
+    meterBars.forEach(function (el, i) { el.classList.toggle('on', i < filled); });
+    meterHop.textContent = hop;
+    meterMs.textContent = (hop > 0 ? HOP_MS[hop - 1] : 0) + ' ms';
+  }
+  var lastHop = -2;
 
   // ---------- Navigation rapide (Ctrl K / Cmd K) ----------
   (function () {
@@ -315,18 +382,19 @@
     function go(url, blank) {
       if (blank) { window.open(url, '_blank', 'noopener'); return; }
       if (url.charAt(0) === '#') {
+        if (wipeJump(url)) return;
         var t = document.querySelector(url);
         if (t) { t.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' }); history.replaceState(null, '', url); }
       } else window.location.href = url;
     }
     var items = [
-      { g: 'Aller à', t: 'À propos', h: '§ 01', u: sec('apropos') },
-      { g: 'Aller à', t: 'Projets', h: '§ 02', u: sec('projets') },
-      { g: 'Aller à', t: 'Parcours', h: '§ 03', u: sec('parcours') },
-      { g: 'Aller à', t: 'Compétences', h: '§ 04', u: sec('competences') },
-      { g: 'Aller à', t: 'Certifications', h: '§ 05', u: sec('certifications') },
-      { g: 'Aller à', t: 'Langues', h: '§ 06', u: sec('langues') },
-      { g: 'Aller à', t: 'Contact', h: '§ 07', u: sec('contact') },
+      { g: 'Aller à', t: 'À propos', h: 'hop 01', u: sec('apropos') },
+      { g: 'Aller à', t: 'Projets', h: 'hop 02', u: sec('projets') },
+      { g: 'Aller à', t: 'Parcours', h: 'hop 03', u: sec('parcours') },
+      { g: 'Aller à', t: 'Compétences', h: 'hop 04', u: sec('competences') },
+      { g: 'Aller à', t: 'Certifications', h: 'hop 05', u: sec('certifications') },
+      { g: 'Aller à', t: 'Langues', h: 'hop 06', u: sec('langues') },
+      { g: 'Aller à', t: 'Contact', h: 'hop 07', u: sec('contact') },
       { g: 'Projets', t: 'Tous les projets', h: 'liste', u: pre + 'projets/index.html' },
       { g: 'Projets', t: 'Application Symfony conteneurisée', h: '2025', u: pre + 'projets/symfony-docker.html' },
       { g: 'Projets', t: 'Jeu web 2048', h: '2025', u: pre + 'projets/jeu-2048.html' },
@@ -339,7 +407,9 @@
       { g: 'Actions', t: 'Appeler', h: '06 73 60 88 94', u: 'tel:+33673608894' },
       { g: 'Actions', t: 'GitHub', h: '↗', u: 'https://github.com/Camyl57/Projets', b: 1 },
       { g: 'Actions', t: 'LinkedIn', h: '↗', u: 'https://www.linkedin.com/in/camyl-khebache-8961a1247/', b: 1 },
-      { g: 'Actions', t: 'Basculer thème clair / sombre', h: 'thème', f: function () { if (tbtn) tbtn.click(); } }
+      { g: 'Actions', t: 'Basculer thème clair / sombre', h: 'thème', f: function () { if (tbtn) tbtn.click(); } },
+      { g: 'Actions', t: 'Afficher / masquer les photos de fond', h: 'fond', f: function () {
+          if (window.__toggleBgPhotos) say(window.__toggleBgPhotos() ? 'Photos de fond affichées' : 'Photos de fond masquées'); } }
     ];
 
     var dlg = document.createElement('dialog');
@@ -397,7 +467,46 @@
   // ---------- Liens du menu : le texte se « brouille » au survol ----------
   if (!reduce && fine) {
     $$('.menu a').forEach(function (a) {
-      a.addEventListener('mouseenter', function () { if (!a.dataset.busy) { a.dataset.busy = '1'; scramble(a, 380); setTimeout(function () { delete a.dataset.busy; }, 420); } });
+      var label = a.querySelector('.nh-label') || a;
+      a.addEventListener('mouseenter', function () { if (!a.dataset.busy) { a.dataset.busy = '1'; scramble(label, 380); setTimeout(function () { delete a.dataset.busy; }, 420); } });
+    });
+  }
+
+  // ---------- Latences fictives : elles vibrent légèrement, comme un ping ----------
+  var pings = $$('[data-ms]');
+  if (pings.length && !reduce) {
+    setInterval(function () {
+      if (document.visibilityState !== 'visible') return;
+      pings.forEach(function (el) {
+        if (el.dataset.tween) return;
+        var base = +el.getAttribute('data-ms');
+        el.textContent = Math.max(1, base + Math.round((Math.random() - 0.4) * 3)) + ' ms';
+      });
+    }, 1800);
+  }
+
+  // ---------- Au survol d'un hop, sa latence change de valeur en 0,3 s ----------
+  function tweenMs(el, to) {
+    var from = parseInt(el.textContent, 10) || to, t0 = null, id = (el._tw = (el._tw || 0) + 1);
+    el.dataset.tween = '1';
+    function step(t) {
+      if (id !== el._tw) return;
+      if (!t0) t0 = t;
+      var k = Math.min((t - t0) / 300, 1);
+      el.textContent = Math.round(from + (to - from) * k) + ' ms';
+      if (k < 1) requestAnimationFrame(step); else delete el.dataset.tween;
+    }
+    requestAnimationFrame(step);
+  }
+  if (!reduce) {
+    $$('.nh').forEach(function (a) {
+      var el = a.querySelector('[data-ms]');
+      if (!el) return;
+      var base = +el.getAttribute('data-ms');
+      var enter = function () { tweenMs(el, base + 4 + Math.round(Math.random() * 6)); };
+      var leave = function () { tweenMs(el, base); };
+      a.addEventListener('mouseenter', enter); a.addEventListener('mouseleave', leave);
+      a.addEventListener('focus', enter); a.addEventListener('blur', leave);
     });
   }
 
@@ -465,6 +574,17 @@
     links.forEach(function (a, i) {
       if (i === current) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
     });
+    if (onHome) {
+      var contact = document.getElementById('contact');
+      var hop = current + 1;
+      if (contact && contact.offsetTop <= y) hop = 7;
+      if (hop !== lastHop) {
+        if (lastHop !== -2 && !root.classList.contains('entry-on')) flipBoard();
+        lastHop = hop;
+        document.dispatchEvent(new CustomEvent('hopchange', { detail: hop }));
+      }
+      updateMeter(y0, max, hop);
+    }
     if (tl) {
       var r = tl.getBoundingClientRect(), p = (window.innerHeight * 0.6 - r.top) / r.height;
       tl.style.setProperty('--tl', Math.max(0, Math.min(1, p)).toFixed(3));
