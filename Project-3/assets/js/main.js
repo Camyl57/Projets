@@ -464,33 +464,6 @@
     }
   })();
 
-  // ---------- Liens mailto : sans messagerie configurée, l'adresse est copiée et une bulle l'indique ----------
-  (function () {
-    var done = false;
-    function flag() { done = true; }
-    function notify(mail) {
-      var toast = document.querySelector('.toast');
-      if (!toast) { toast = document.createElement('div'); toast.className = 'toast'; toast.setAttribute('role', 'status'); document.body.appendChild(toast); }
-      toast.textContent = 'Aucune messagerie détectée : adresse copiée (' + mail + ')';
-      toast.classList.add('on');
-      setTimeout(function () { toast.classList.remove('on'); }, 4200);
-    }
-    document.addEventListener('click', function (e) {
-      var a = e.target.closest && e.target.closest('a[href^="mailto:"]');
-      if (!a || e.defaultPrevented) return;
-      var mail = a.getAttribute('href').replace(/^mailto:/, '').split('?')[0];
-      done = false;
-      window.addEventListener('blur', flag, { once: true });
-      document.addEventListener('visibilitychange', flag, { once: true });
-      setTimeout(function () {
-        window.removeEventListener('blur', flag); document.removeEventListener('visibilitychange', flag);
-        if (done) return;
-        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(mail).then(function () { notify(mail); }, function () { notify(mail); });
-        else notify(mail);
-      }, 1600);
-    });
-  })();
-
   // ---------- Liens du menu : le texte se « brouille » au survol ----------
   if (!reduce && fine) {
     $$('.menu a').forEach(function (a) {
