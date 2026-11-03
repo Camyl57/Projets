@@ -1,0 +1,41 @@
+/* ============================================================================
+   Fond « réseau » (voir assets/js/bg.js) : grille discrète, photos très atténuées, canvas animé.
+   Les sections deviennent légèrement translucides pour laisser voir la scène ; les cartes restent pleines.
+   ========================================================================== */
+
+.bg-scene { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+/* grille de fond discrète, toujours visible (même sans JavaScript animé) */
+.bg-scene::before {
+  content: ""; position: absolute; inset: 0; z-index: 2;
+  background:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px) 0 0 / 56px 56px,
+    linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse at 50% 35%, #000 25%, transparent 85%);
+  mask-image: radial-gradient(ellipse at 50% 35%, #000 25%, transparent 85%);
+}
+.bg-net { position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; display: block; }
+
+/* photos : monochromes, puis recouvertes d'un voile à 90-91 % de la couleur de fond (lisibilité AA) */
+.bg-photos { position: absolute; inset: 0; z-index: 0; }
+.bg-photo { position: absolute; inset: 0; background: center / cover no-repeat; filter: grayscale(1) contrast(1.05);
+  opacity: 0; transition: opacity 1.2s ease; }
+.bg-photo.on { opacity: 1; }
+/* thème sombre : photos assombries avant le voile, pour que même les zones claires gardent un bon contraste */
+:root:not([data-theme="light"]) .bg-photo { filter: grayscale(1) contrast(1.05) brightness(.55); }
+.bg-shade { position: absolute; inset: 0; z-index: 1;
+  background:
+    radial-gradient(ellipse at 50% 30%, transparent 0%, var(--bg) 95%),
+    color-mix(in srgb, var(--bg) 90%, transparent); }
+:root[data-theme="light"] .bg-shade { background:
+    radial-gradient(ellipse at 50% 30%, transparent 0%, var(--bg) 95%),
+    color-mix(in srgb, var(--bg) 91%, transparent); }
+
+/* sections et héros translucides : la scène reste visible entre les blocs de contenu */
+section.alt { background: color-mix(in srgb, var(--bg-2) 72%, transparent); }
+.hero { background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 35%, transparent) 0%, color-mix(in srgb, var(--bg-2) 70%, transparent) 100%); }
+.site-nav { background: var(--nav-bg); }
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-photo { transition: none; }
+}
+@media print { .bg-scene { display: none; } }

@@ -1,0 +1,162 @@
+/* ============================================================================
+   Thème « traceroute » : le site se lit comme la sortie d'un traceroute.
+   Chaque section est un hop (numéro + latence), la navigation est le chemin
+   des hops, et le terminal du hero envoie un ping.
+   Cette feuille ne change QUE l'apparence : aucun contenu n'est retiré.
+   Les éléments décoratifs ajoutés (latences, IP, lignes de ping) sont aria-hidden.
+   ========================================================================== */
+
+/* ------------------------------------------------------------ Navigation : hops */
+.site-nav { border-bottom-color: color-mix(in srgb, var(--accent) 24%, var(--line)); }
+.menu { gap: 0; align-items: center; }
+.menu li { display: flex; align-items: center; }
+.menu li + li::before { content: ""; width: 14px; margin: 0 1px; border-top: 1px dashed var(--dolphin); }
+
+.menu .nh {
+  position: relative; display: flex; flex-direction: column; gap: 1px; padding: 6px 10px;
+  border: 1px solid transparent; border-radius: 8px; text-decoration: none; color: var(--muted);
+  font-family: var(--mono); transition: color .2s, border-color .2s, background .2s, box-shadow .2s;
+}
+.nh-meta { display: flex; gap: 8px; font-size: 10px; letter-spacing: .04em; line-height: 1.2; }
+.nh-meta b { color: var(--accent); font-weight: 700; }
+.nh-meta i { font-style: normal; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 4.2ch; }
+.nh-label { font-size: 13px; line-height: 1.3; }
+
+/* survol / focus clavier : le hop s'allume et révèle son IP fictive */
+.menu .nh:hover, .menu .nh:focus-visible {
+  color: var(--text); border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent), 0 0 18px -4px var(--glow);
+}
+.menu .nh[aria-current="true"], .menu .nh[aria-current="page"] {
+  color: var(--text); border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+.menu .nh[aria-current="true"] .nh-meta i, .menu .nh[aria-current="page"] .nh-meta i,
+.menu .nh:hover .nh-meta i, .menu .nh:focus-visible .nh-meta i { color: var(--accent); }
+.menu .nh::after, .menu .nh:hover::after, .menu .nh[aria-current="true"]::after, .menu .nh[aria-current="page"]::after { content: none; display: none; }
+
+.nh-ip {
+  position: absolute; top: calc(100% + 8px); left: 0; z-index: 30; white-space: nowrap;
+  padding: 6px 10px; border: 1px solid var(--accent); border-radius: 6px; background: var(--card); color: var(--accent);
+  font-size: 11px; letter-spacing: .02em; box-shadow: var(--shadow); pointer-events: none;
+  opacity: 0; transform: translateY(-4px); transition: opacity .18s, transform .18s;
+}
+.menu li:nth-last-child(-n+2) .nh-ip { left: auto; right: 0; }
+.menu .nh:hover .nh-ip, .menu .nh:focus-visible .nh-ip { opacity: 1; transform: none; }
+
+@media (min-width: 801px) and (max-width: 1040px) {
+  .menu li + li::before { width: 8px; }
+  .menu .nh { padding: 6px 7px; }
+  .nh-label { font-size: 12px; }
+}
+
+/* mobile : la liste ouverte se lit comme les lignes d'un traceroute (IP toujours visible, pas de survol) */
+@media (max-width: 800px) {
+  .menu li + li::before { display: none; }
+  .menu .nh {
+    flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; width: 100%;
+    padding: 12px 2px; border: 0; border-top: 1px dashed var(--line); border-radius: 0; background: none; box-shadow: none;
+  }
+  .nh-meta { display: contents; }
+  .nh-meta b { font-size: 12px; }
+  .nh-label { font-size: 15px; color: var(--text); }
+  .nh-meta i { order: 3; margin-left: auto; font-size: 12px; }
+  .nh-ip { position: static; order: 4; flex-basis: 100%; opacity: 1; transform: none; padding: 0; border: 0; background: none; box-shadow: none; color: var(--muted); font-size: 11px; }
+  .menu .nh:hover, .menu .nh:focus-visible, .menu .nh[aria-current="true"] { background: color-mix(in srgb, var(--accent) 8%, transparent); box-shadow: none; }
+  .menu { align-items: stretch; }
+  .menu li { display: block; width: 100%; }
+}
+
+/* ------------------------------------------------------------ Sections : numéros de hop */
+section, .hero, .bigtext { border-bottom-style: dashed; }
+.eyebrow { gap: 10px; text-transform: none; letter-spacing: .04em; }
+.eyebrow .hopno {
+  order: 1; padding: 2px 9px; border: 1px solid var(--accent); border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+  background: color-mix(in srgb, var(--accent) 10%, transparent); box-shadow: 0 0 14px -6px var(--glow);
+}
+.eyebrow span { order: 2; text-transform: uppercase; letter-spacing: .08em; }
+.eyebrow::after { order: 3; flex: 0 1 auto; min-width: 0; background: repeating-linear-gradient(90deg, var(--accent) 0 5px, transparent 5px 9px); height: 1px; }
+.eyebrow.drawn::after { width: min(140px, 22vw); }
+.eyebrow .hopms { order: 4; font-style: normal; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* ------------------------------------------------------------ Hero */
+.trace-cmd {
+  position: absolute; z-index: 1; top: 22px; left: max(var(--gutter), calc((100% - 1040px) / 2 + 24px)); right: var(--gutter);
+  margin: 0; font-family: var(--mono); font-size: 11px; letter-spacing: .02em; color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.trace-cmd b { color: var(--accent); }
+.trace-cmd span { opacity: .75; }
+@media (min-width: 720px) { .trace-cmd { top: 40px; left: max(24px, calc((100% - 1040px) / 2 + 24px)); } }
+
+.hero .kicker { color: var(--accent); }
+.status { color: var(--accent); }
+.dot { background: var(--accent); box-shadow: 0 0 0 0 var(--glow); }
+.live { background: var(--accent); }
+@keyframes ping { 70% { box-shadow: 0 0 0 10px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+
+/* terminal : phosphore vert + lignes de ping */
+.term { position: relative; }
+.term::after { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+  background: repeating-linear-gradient(transparent 0 2px, rgba(52,232,162,.035) 2px 3px); }
+.term-bar { border-bottom-color: #14372b; }
+.term-body .l.ping { color: var(--muted); }
+.term-body i[data-ms] { font-style: normal; color: var(--accent); font-variant-numeric: tabular-nums; animation: beat 2.4s ease-in-out infinite; }
+@keyframes beat { 50% { color: var(--text); } }
+
+/* ------------------------------------------------------------ Chiffres : relevé de ping */
+.stats { background: var(--card); }
+.stats::before {
+  content: "--- camyl.dev ping statistics ---" / ""; grid-column: 1 / -1; padding: 9px 22px; border-bottom: 1px solid var(--line);
+  font-family: var(--mono); font-size: 11px; letter-spacing: .03em; color: var(--muted);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+.stats strong { text-shadow: 0 0 22px var(--glow); }
+
+/* ------------------------------------------------------------ Bandeau de technologies : table de routage */
+.marquee { transform: none; border-block: 1px dashed color-mix(in srgb, var(--band-ink) 45%, transparent); }
+.mq span::after { content: "▸"; margin: 0 22px; opacity: .65; }
+
+/* ------------------------------------------------------------ À propos : l'illustration porte des IP */
+.net-row .hop::after { display: block; margin-top: 4px; font-size: 9.5px; color: var(--muted); letter-spacing: .02em; }
+.net-row .hop:nth-child(2)::after { content: "10.57.0.10"; }
+.net-row .hop:nth-child(3)::after { content: "10.57.0.1"; }
+.net-row .hop:nth-child(4)::after { content: "10.57.0.254"; }
+.net-row .hop:nth-child(5)::after { content: "172.16.0.1"; }
+.net-row .hop:nth-child(6)::after { content: "172.16.0.80"; }
+@media (max-width: 640px) { .net-row .hop::after { display: none; } }
+.card, .project, .cert, .skill-panels { border-color: color-mix(in srgb, var(--accent) 14%, var(--line)); }
+.focus > div { border-left-color: color-mix(in srgb, var(--accent) 55%, transparent); }
+
+/* ------------------------------------------------------------ Parcours : lignes numérotées d'un traceroute */
+.timeline { counter-reset: tl; border-left-style: dashed; border-left-color: var(--dolphin); }
+.item::before { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent); }
+.item .when { display: flex; align-items: baseline; gap: 8px; }
+.item .when::before { counter-increment: tl; content: counter(tl, decimal-leading-zero) " ▸" / ""; color: var(--accent); font-weight: 700; }
+.timeline::after { box-shadow: 0 0 14px var(--glow); }
+
+/* ------------------------------------------------------------ Compétences, langues, contact */
+.skill-tab .n { color: var(--muted); }
+.skill-tab[aria-selected="true"] { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.dots i.on { background: var(--accent); }
+.js .langs li[data-reveal]:not(.in) .dots i.on { background: var(--line); }
+.langs small { color: var(--accent); }
+.contact-list .label { color: var(--accent); }
+.contact-list .label::before { content: "› " / ""; }
+
+/* ------------------------------------------------------------ Boutons */
+.btn { border-color: color-mix(in srgb, var(--accent) 38%, var(--line)); }
+.btn.primary { border-color: var(--text); }
+.btn.primary:hover { border-color: var(--accent); }
+
+/* ------------------------------------------------------------ Pied de page : fin du traceroute */
+.trace-end { display: block; margin: 0 0 10px; color: var(--muted); }
+.trace-end .ok { color: var(--accent); }
+.trace-end i { font-style: normal; color: var(--accent); font-variant-numeric: tabular-nums; }
+
+/* ------------------------------------------------------------ Mouvement réduit : tout est statique */
+@media (prefers-reduced-motion: reduce) {
+  .term-body i[data-ms] { animation: none; }
+  .nh-ip { transition: none; }
+}

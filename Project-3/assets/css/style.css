@@ -1,42 +1,45 @@
 :root {
-  --bg: #e4e8ed;
-  --bg-2: #cdd4dc;
-  --card: #f6f8fa;
-  --line: #b4bfcb;
-  --text: #142a6b;
-  --muted: #3f506c;
-  --accent: #2848c9;
-  --accent-2: #6b8cff;
-  --dolphin: #7a8797;
-  --grid: rgba(110,124,142,.2);
-  --on-accent: #ffffff;
-  --band-bg: #2848c9;
-  --band-ink: #ffffff;
-  --shadow: 0 1px 2px rgba(20,42,107,.06), 0 16px 32px -20px rgba(20,42,107,.35);
-  --nav-bg: rgba(228,232,237,.9);
+  /* Thème « traceroute » : sombre par défaut (vert terminal + cyan sur fond bleu-noir) */
+  --bg: #050b0f;
+  --bg-2: #08131a;
+  --card: #0b1820;
+  --line: #173340;
+  --text: #dcf5ea;
+  --muted: #86a99b;
+  --accent: #34e8a2;
+  --accent-2: #19c3dd;
+  --dolphin: #3f6a73;
+  --grid: rgba(52,232,162,.07);
+  --on-accent: #03130c;
+  --band-bg: #34e8a2;
+  --band-ink: #03130c;
+  --glow: rgba(52,232,162,.35);
+  --shadow: 0 0 0 1px rgba(52,232,162,.04), 0 16px 32px -20px rgba(0,0,0,.85);
+  --nav-bg: rgba(5,11,15,.88);
   --serif: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
   --sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
   --mono: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
   --gutter: 16px;
-  color-scheme: light;
-}
-:root[data-theme="dark"] {
-  --bg: #0d0e11;
-  --bg-2: #14161b;
-  --card: #16181d;
-  --line: #2a2e38;
-  --text: #f2f3f5;
-  --muted: #9aa0ad;
-  --accent: #8da8ff;
-  --accent-2: #6f8ff5;
-  --dolphin: #8a96a3;
-  --grid: rgba(255,255,255,.04);
-  --on-accent: #0d0e11;
-  --band-bg: #8da8ff;
-  --band-ink: #0d0e11;
-  --shadow: none;
-  --nav-bg: rgba(13,14,17,.9);
   color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --bg: #f0f6f4;
+  --bg-2: #dfece8;
+  --card: #fbfefd;
+  --line: #9cb9ae;
+  --text: #0b2820;
+  --muted: #3a5a50;
+  --accent: #006f55;
+  --accent-2: #0a8fa6;
+  --dolphin: #6f8f87;
+  --grid: rgba(0,111,85,.10);
+  --on-accent: #ffffff;
+  --band-bg: #006f55;
+  --band-ink: #ffffff;
+  --glow: rgba(0,111,85,.28);
+  --shadow: 0 1px 2px rgba(10,40,32,.06), 0 14px 28px -18px rgba(10,40,32,.3);
+  --nav-bg: rgba(240,246,244,.9);
+  color-scheme: light;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; scroll-padding-top: 72px; -webkit-text-size-adjust: 100%; }

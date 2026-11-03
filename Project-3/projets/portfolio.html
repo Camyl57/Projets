@@ -5,12 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Portfolio personnel · Camyl Khebache</title>
 <meta name="description" content="Site statique responsive et accessible, sans framework ni dépendance externe : parcours, projets et contact, avec thèmes clair et sombre.">
-<meta name="theme-color" content="#e4e8ed">
+<meta name="theme-color" content="#050b0f">
 <meta name="color-scheme" content="light dark">
-<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<script>try{var t=localStorage.getItem('theme');document.documentElement.dataset.theme=(t==='light'||t==='dark')?t:'dark'}catch(e){document.documentElement.dataset.theme='dark'}</script>
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../assets/css/style.css">
 <link rel="stylesheet" href="../assets/css/animations.css">
+<link rel="stylesheet" href="../assets/css/traceroute.css">
+<link rel="stylesheet" href="../assets/css/motion.css">
+<link rel="stylesheet" href="../assets/css/background.css">
+<script src="../assets/js/bg.js" defer></script>
 <script src="../assets/js/main.js" defer></script>
 </head>
 <body>
@@ -20,12 +24,12 @@
     <a class="brand" href="../index.html" aria-label="Camyl Khebache, accueil"><span class="logo" aria-hidden="true"><b class="c">C</b><b class="k">K</b><i></i></span></a>
     <nav aria-label="Navigation principale">
       <ul class="menu" id="menu">
-        <li><a href="../index.html#apropos">À propos</a></li>
-        <li><a href="index.html" aria-current="page">Projets</a></li>
-        <li><a href="../index.html#parcours">Parcours</a></li>
-        <li><a href="../index.html#competences">Compétences</a></li>
-        <li><a href="../index.html#certifications">Certifications</a></li>
-        <li><a href="../index.html#langues">Langues</a></li>
+        <li style="--i:1"><a class="nh" href="../index.html#apropos"><span class="nh-meta" aria-hidden="true"><b>01</b><i data-ms="2">2 ms</i></span><span class="nh-label">À propos</span><span class="nh-ip" aria-hidden="true">10.57.1.1 · apropos.camyl.lan</span></a></li>
+        <li style="--i:2"><a class="nh" href="index.html" aria-current="page"><span class="nh-meta" aria-hidden="true"><b>02</b><i data-ms="5">5 ms</i></span><span class="nh-label">Projets</span><span class="nh-ip" aria-hidden="true">10.57.2.1 · projets.camyl.lan</span></a></li>
+        <li style="--i:3"><a class="nh" href="../index.html#parcours"><span class="nh-meta" aria-hidden="true"><b>03</b><i data-ms="9">9 ms</i></span><span class="nh-label">Parcours</span><span class="nh-ip" aria-hidden="true">10.57.3.1 · parcours.camyl.lan</span></a></li>
+        <li style="--i:4"><a class="nh" href="../index.html#competences"><span class="nh-meta" aria-hidden="true"><b>04</b><i data-ms="14">14 ms</i></span><span class="nh-label">Compétences</span><span class="nh-ip" aria-hidden="true">10.57.4.1 · competences.camyl.lan</span></a></li>
+        <li style="--i:5"><a class="nh" href="../index.html#certifications"><span class="nh-meta" aria-hidden="true"><b>05</b><i data-ms="21">21 ms</i></span><span class="nh-label">Certifications</span><span class="nh-ip" aria-hidden="true">10.57.5.1 · certifications.camyl.lan</span></a></li>
+        <li style="--i:6"><a class="nh" href="../index.html#langues"><span class="nh-meta" aria-hidden="true"><b>06</b><i data-ms="27">27 ms</i></span><span class="nh-label">Langues</span><span class="nh-ip" aria-hidden="true">10.57.6.1 · langues.camyl.lan</span></a></li>
       </ul>
     </nav>
     <div class="nav-tools">
@@ -56,7 +60,7 @@
 </div>
 </main>
 <footer>
-  <div class="wrap">© 2026 Camyl Khebache · Site statique, sans suivi</div>
+  <div class="wrap"><p class="trace-end" aria-hidden="true"><span class="ok">✔</span> traceroute terminé · 7 hops · destination atteinte en <i data-ms="33">33 ms</i></p>© 2026 Camyl Khebache · Site statique, sans suivi</div>
 </footer>
 </body>
 </html>

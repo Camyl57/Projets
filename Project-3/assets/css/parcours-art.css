@@ -1,0 +1,61 @@
+/* ============================================================================
+   § 03 Parcours : schéma télécom / cybersécurité à droite de la 3e entrée (voir assets/js/tl-art.js).
+   Décoratif (aria-hidden) ; animé seulement quand il est visible ; statique avec prefers-reduced-motion.
+   ========================================================================== */
+
+.has-art { --art-w: 360px; }
+.tl-art {
+  margin: 18px 0 0; width: min(100%, var(--art-w));
+  border: 1px solid var(--line); border-radius: 14px; padding: 6px;
+  background: color-mix(in srgb, var(--card) 82%, transparent); box-shadow: var(--shadow);
+}
+.tl-art svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+/* ordinateur : sans le grand schéma (JavaScript absent), le petit schéma occupe la colonne vide, aligné sur la 3e entrée */
+@media (min-width: 1000px) {
+  .item.has-art > :not(.tl-art) { max-width: calc(100% - var(--art-w) - 36px); }
+  .tl-art { position: absolute; top: -6px; right: 0; margin: 0; }
+}
+
+/* ordinateur avec JavaScript : un grand schéma occupe toute la hauteur de la frise, à droite */
+.tl-tall { display: none; }
+@media (min-width: 1000px) {
+  html.tl-tall-on .timeline { --art-w: 360px; }
+  html.tl-tall-on .timeline > .item > :not(.tl-art) { max-width: calc(100% - var(--art-w) - 36px); }
+  html.tl-tall-on .tl-art { display: none; }
+  .tl-tall {
+    display: block; position: absolute; top: 0; bottom: 0; right: 0; width: var(--art-w, 360px); margin: 0;
+    border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+    background: color-mix(in srgb, var(--card) 70%, transparent);
+  }
+  .tl-tall svg { display: block; width: 100%; height: 100%; overflow: hidden; }
+}
+
+/* traits : lisibles en clair comme en sombre (rapport ≥ 3:1 avec le fond) */
+.tl-art line, .tl-tall line { stroke: var(--accent); stroke-opacity: .55; stroke-width: 1.4; stroke-dasharray: 4 6; animation: tlFlow 2.4s linear infinite; }
+.tl-box, .tl-shield { fill: var(--card); stroke: var(--accent); stroke-width: 1.6; }
+.tl-line { fill: none; stroke: var(--accent); stroke-width: 1.6; stroke-linecap: round; }
+.tl-core { fill: var(--accent-2); animation: tlTw 3.2s ease-in-out infinite; animation-delay: var(--d, 0s); }
+.tl-ant .tl-core { fill: var(--accent); }
+.tl-wave { fill: none; stroke: var(--accent-2); stroke-width: 1.6; stroke-linecap: round; animation: tlWave 2.4s ease-in-out infinite; animation-delay: var(--w, 0s); }
+.tl-shield { fill: color-mix(in srgb, var(--accent) 14%, var(--card)); stroke-width: 2; filter: drop-shadow(0 0 6px var(--glow)); }
+.tl-lock { fill: var(--accent); }
+.tl-halo { fill: none; stroke: var(--accent); stroke-width: 1.4; transform-box: fill-box; transform-origin: center; animation: tlHalo 3.6s ease-out infinite; }
+.tl-art text, .tl-tall text { font: 10px var(--mono); letter-spacing: .06em; fill: var(--muted); }
+.tl-art .tl-cap, .tl-tall .tl-cap { fill: var(--accent); font-size: 10.5px; }
+.tl-pk { fill: var(--accent-2); filter: drop-shadow(0 0 4px var(--accent-2)); }
+
+@keyframes tlFlow { to { stroke-dashoffset: -20; } }
+@keyframes tlTw { 0%, 100% { opacity: .62; } 50% { opacity: 1; } }
+@keyframes tlWave { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+@keyframes tlHalo { 0% { transform: scale(.72); opacity: .6; } 100% { transform: scale(1.45); opacity: 0; } }
+
+/* en pause tant que la section n'est pas à l'écran */
+.tl-art:not(.run) *, .tl-tall:not(.run) * { animation-play-state: paused; }
+
+/* mouvement réduit : version statique, aucun paquet, aucun scintillement */
+@media (prefers-reduced-motion: reduce) {
+  .tl-art line, .tl-tall line, .tl-core, .tl-wave, .tl-halo { animation: none; }
+  .tl-halo { opacity: .35; transform: scale(1.1); }
+  .tl-pk { display: none; }
+}

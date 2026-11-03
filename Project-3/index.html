@@ -5,18 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Camyl Khebache · Étudiant ingénieur Réseaux et Télécoms, stage 2027</title>
 <meta name="description" content="Camyl Khebache, étudiant en cycle ingénieur Réseaux et Télécommunications à l'UTT (Troyes), ancien BUT Informatique. Projets, parcours et contact. Recherche un stage à partir de septembre 2027.">
-<meta name="theme-color" content="#e4e8ed">
+<meta name="theme-color" content="#050b0f">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <meta property="og:title" content="Camyl Khebache · Étudiant ingénieur Réseaux et Télécoms">
 <meta property="og:description" content="Projets, parcours et contact. Recherche un stage à partir de septembre 2027.">
 <meta property="og:type" content="website">
-<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<script>try{var t=localStorage.getItem('theme');document.documentElement.dataset.theme=(t==='light'||t==='dark')?t:'dark'}catch(e){document.documentElement.dataset.theme='dark'}</script>
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="stylesheet" href="assets/css/animations.css">
+<link rel="stylesheet" href="assets/css/traceroute.css">
+<link rel="stylesheet" href="assets/css/motion.css">
+<link rel="stylesheet" href="assets/css/background.css">
+<link rel="stylesheet" href="assets/css/parcours-art.css">
+<script src="assets/js/bg.js" defer></script>
+<script src="assets/js/tl-art.js" defer></script>
 <script src="assets/js/main.js" defer></script>
 </head>
 <body id="top">
+<script src="assets/js/entry.js"></script>
 <a class="skip" href="#contenu">Aller au contenu</a>
 <div class="progress" aria-hidden="true"></div>
 
@@ -25,12 +32,12 @@
     <a class="brand" href="#top" aria-label="Camyl Khebache, accueil"><span class="logo" aria-hidden="true"><b class="c">C</b><b class="k">K</b><i></i></span></a>
     <nav aria-label="Navigation principale">
       <ul class="menu" id="menu">
-        <li><a href="#apropos">À propos</a></li>
-        <li><a href="#projets">Projets</a></li>
-        <li><a href="#parcours">Parcours</a></li>
-        <li><a href="#competences">Compétences</a></li>
-        <li><a href="#certifications">Certifications</a></li>
-        <li><a href="#langues">Langues</a></li>
+        <li style="--i:1"><a class="nh" href="#apropos"><span class="nh-meta" aria-hidden="true"><b>01</b><i data-ms="2">2 ms</i></span><span class="nh-label">À propos</span><span class="nh-ip" aria-hidden="true">10.57.1.1 · apropos.camyl.lan</span></a></li>
+        <li style="--i:2"><a class="nh" href="#projets"><span class="nh-meta" aria-hidden="true"><b>02</b><i data-ms="5">5 ms</i></span><span class="nh-label">Projets</span><span class="nh-ip" aria-hidden="true">10.57.2.1 · projets.camyl.lan</span></a></li>
+        <li style="--i:3"><a class="nh" href="#parcours"><span class="nh-meta" aria-hidden="true"><b>03</b><i data-ms="9">9 ms</i></span><span class="nh-label">Parcours</span><span class="nh-ip" aria-hidden="true">10.57.3.1 · parcours.camyl.lan</span></a></li>
+        <li style="--i:4"><a class="nh" href="#competences"><span class="nh-meta" aria-hidden="true"><b>04</b><i data-ms="14">14 ms</i></span><span class="nh-label">Compétences</span><span class="nh-ip" aria-hidden="true">10.57.4.1 · competences.camyl.lan</span></a></li>
+        <li style="--i:5"><a class="nh" href="#certifications"><span class="nh-meta" aria-hidden="true"><b>05</b><i data-ms="21">21 ms</i></span><span class="nh-label">Certifications</span><span class="nh-ip" aria-hidden="true">10.57.5.1 · certifications.camyl.lan</span></a></li>
+        <li style="--i:6"><a class="nh" href="#langues"><span class="nh-meta" aria-hidden="true"><b>06</b><i data-ms="27">27 ms</i></span><span class="nh-label">Langues</span><span class="nh-ip" aria-hidden="true">10.57.6.1 · langues.camyl.lan</span></a></li>
       </ul>
     </nav>
     <div class="nav-tools">
@@ -44,6 +51,7 @@
 <main id="contenu">
 <div class="hero">
   <canvas class="net" aria-hidden="true"></canvas>
+  <p class="trace-cmd" aria-hidden="true"><b>$</b> traceroute -m 7 camyl.dev <span>10.57.0.1 · 60 byte packets</span></p>
   <div class="wrap hero-grid">
     <div class="hero-text">
       <p class="kicker">Portfolio · 2026</p>
@@ -64,7 +72,11 @@
 <span class="l" style="--i:4"><u>base</u>    Farébersviller / Troyes</span>
 <span class="l" style="--i:5"><u>focus</u>   réseaux · cloud · automatisation</span>
 <span class="l" style="--i:6"><u>stage</u>   septembre 2027</span>
-<span class="l" style="--i:7"><b>$</b> <span class="cursor"></span></span></pre>
+<span class="l" style="--i:7"><b>$</b> ping -c 3 utt.camyl.lan</span>
+<span class="l ping" style="--i:8">64 B from 10.57.0.1 seq=1 time=<i data-ms="12">12 ms</i></span>
+<span class="l ping" style="--i:9">64 B from 10.57.0.1 seq=2 time=<i data-ms="11">11 ms</i></span>
+<span class="l ping" style="--i:10">64 B from 10.57.0.1 seq=3 time=<i data-ms="13">13 ms</i></span>
+<span class="l" style="--i:11"><b>$</b> <span class="cursor"></span></span></pre>
     </div>
   </div>
 </div>
@@ -82,7 +94,7 @@
 
 <section id="apropos" aria-labelledby="t-apropos">
   <div class="wrap">
-    <div class="eyebrow">§ 01 <span>À propos</span></div>
+    <div class="eyebrow"><b class="hopno">hop 01</b> <span>À propos</span> <i class="hopms" aria-hidden="true" data-ms="2">2 ms</i></div>
     <h2 id="t-apropos">Du développement d'applications <em>aux réseaux et télécommunications.</em></h2>
     <div class="about-grid">
       <!-- Pour ajouter une photo : déposez assets/img/photo.jpg (format portrait 4:5). Elle apparaît d'elle-même. -->
@@ -122,7 +134,7 @@
 
 <section id="projets" class="alt" aria-labelledby="t-projets">
   <div class="wrap">
-    <div class="eyebrow">§ 02 <span>Projets</span></div>
+    <div class="eyebrow"><b class="hopno">hop 02</b> <span>Projets</span> <i class="hopms" aria-hidden="true" data-ms="5">5 ms</i></div>
     <h2 id="t-projets">Ce que <em>j'ai construit.</em></h2>
     <div class="grid">
       <article class="project">
@@ -150,7 +162,7 @@
 
 <section id="parcours" aria-labelledby="t-parcours">
   <div class="wrap">
-    <div class="eyebrow">§ 03 <span>Parcours</span></div>
+    <div class="eyebrow"><b class="hopno">hop 03</b> <span>Parcours</span> <i class="hopms" aria-hidden="true" data-ms="9">9 ms</i></div>
     <h2 id="t-parcours">Formation <em>&amp; expériences.</em></h2>
     <ol class="timeline">
       <li class="item edu">
@@ -173,7 +185,7 @@
           <li>Création d'une vidéo promotionnelle (script, montage, synchronisation)</li>
         </ul>
       </li>
-      <li class="item edu">
+      <li class="item edu has-art">
         <div class="when">2024 – 2025</div>
         <h3>BUT Informatique, 2e année</h3>
         <div class="where">IUT de Metz</div>
@@ -182,6 +194,48 @@
           <li>Projet : <a href="projets/jeu-2048.html">jeu web 2048</a> en TypeScript</li>
           <li>Projet : <a href="projets/symfony-docker.html">application Symfony conteneurisée</a> avec Docker, Nginx et GitLab Container Registry</li>
         </ul>
+        <figure class="tl-art" aria-hidden="true">
+          <svg viewBox="0 0 360 250" focusable="false">
+            <text class="tl-cap" x="180" y="15" text-anchor="middle">// liaison sécurisée</text>
+            <g class="tl-links">
+              <line x1="50" y1="52" x2="130" y2="124" /><line x1="46" y1="196" x2="130" y2="124" />
+              <line x1="130" y1="124" x2="226" y2="124" /><line x1="226" y1="124" x2="310" y2="52" /><line x1="226" y1="124" x2="310" y2="196" />
+            </g>
+            <g class="tl-node tl-ant" data-node="A" data-x="50" data-y="52" style="--d:.2s">
+              <path class="tl-wave" style="--w:0s" d="M58 44a12 12 0 0 1 0 16M42 44a12 12 0 0 0 0 16" />
+              <path class="tl-wave" style="--w:.5s" d="M64 38a20 20 0 0 1 0 28M36 38a20 20 0 0 0 0 28" />
+              <path class="tl-line" d="M50 56L40 88M50 56L60 88M44 76H56" />
+              <circle class="tl-core" cx="50" cy="52" r="5" />
+              <text x="50" y="106" text-anchor="middle">5G</text>
+            </g>
+            <g class="tl-node" data-node="P" data-x="46" data-y="196" style="--d:1.1s">
+              <rect class="tl-box" x="28" y="182" width="36" height="24" rx="3" /><path class="tl-line" d="M22 212H70" />
+              <circle class="tl-core" cx="46" cy="194" r="3" />
+              <text x="46" y="232" text-anchor="middle">POSTE</text>
+            </g>
+            <g class="tl-node" data-node="R" data-x="130" data-y="124" style="--d:.7s">
+              <rect class="tl-box" x="106" y="110" width="48" height="28" rx="6" />
+              <circle class="tl-core" cx="118" cy="124" r="3" /><circle class="tl-core" cx="130" cy="124" r="3" style="--d:1.6s" /><circle class="tl-core" cx="142" cy="124" r="3" style="--d:2.2s" />
+              <text x="130" y="158" text-anchor="middle">ROUTEUR</text>
+            </g>
+            <g class="tl-node tl-fw" data-node="FW" data-x="226" data-y="124">
+              <circle class="tl-halo" cx="226" cy="128" r="32" />
+              <path class="tl-shield" d="M226 98L250 107V128C250 143 239 152 226 158C213 152 202 143 202 128V107Z" />
+              <rect class="tl-lock" x="218" y="124" width="16" height="13" rx="2" /><path class="tl-line" d="M221 124V119a5 5 0 0 1 10 0V124" />
+              <text x="226" y="176" text-anchor="middle">PARE-FEU</text>
+            </g>
+            <g class="tl-node" data-node="C" data-x="310" data-y="52" style="--d:1.5s">
+              <path class="tl-box" d="M293 64H327A10 10 0 0 0 327 44A15 15 0 0 0 298 42A11 11 0 0 0 293 64Z" />
+              <text x="310" y="82" text-anchor="middle">CLOUD</text>
+            </g>
+            <g class="tl-node" data-node="S" data-x="310" data-y="196" style="--d:.4s">
+              <rect class="tl-box" x="292" y="178" width="36" height="14" rx="3" /><rect class="tl-box" x="292" y="196" width="36" height="14" rx="3" />
+              <circle class="tl-core" cx="300" cy="185" r="2" /><circle class="tl-core" cx="300" cy="203" r="2" style="--d:1.9s" />
+              <text x="310" y="232" text-anchor="middle">SERVEUR</text>
+            </g>
+            <g class="tl-packets"></g>
+          </svg>
+        </figure>
       </li>
       <li class="item">
         <div class="when">Juin 2023</div>
@@ -224,7 +278,7 @@
 
 <section id="competences" class="alt" aria-labelledby="t-competences">
   <div class="wrap">
-    <div class="eyebrow">§ 04 <span>Compétences</span></div>
+    <div class="eyebrow"><b class="hopno">hop 04</b> <span>Compétences</span> <i class="hopms" aria-hidden="true" data-ms="14">14 ms</i></div>
     <h2 id="t-competences">Compétences <em>&amp; qualités.</em></h2>
     <div class="skills-ui">
       <div class="skill-tabs" role="tablist" aria-label="Domaines de compétences" aria-orientation="vertical">
@@ -261,7 +315,7 @@
 
 <section id="certifications" aria-labelledby="t-certifications">
   <div class="wrap">
-    <div class="eyebrow">§ 05 <span>Certifications</span></div>
+    <div class="eyebrow"><b class="hopno">hop 05</b> <span>Certifications</span> <i class="hopms" aria-hidden="true" data-ms="21">21 ms</i></div>
     <h2 id="t-certifications">Certifications <em>&amp; attestations.</em></h2>
     <p class="body">Des formations suivies en cybersécurité, de l'ANSSI au LIST.</p>
     <div class="cert-grid">
@@ -299,7 +353,7 @@
 
 <section id="langues" class="alt" aria-labelledby="t-langues">
   <div class="wrap">
-    <div class="eyebrow">§ 06 <span>Langues</span></div>
+    <div class="eyebrow"><b class="hopno">hop 06</b> <span>Langues</span> <i class="hopms" aria-hidden="true" data-ms="27">27 ms</i></div>
     <h2 id="t-langues">Langues <em>parlées.</em></h2>
     <ul class="langs">
       <li><strong>Français</strong><small>langue maternelle</small><span class="dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></li>
@@ -316,7 +370,7 @@
 
 <section id="contact" aria-labelledby="t-contact">
   <div class="wrap">
-    <div class="eyebrow">§ 07 <span>Contact</span></div>
+    <div class="eyebrow"><b class="hopno">hop 07</b> <span>Contact</span> <i class="hopms" aria-hidden="true" data-ms="33">33 ms</i></div>
     <h2 id="t-contact">Discutons <em>d'un stage.</em></h2>
     <p class="body">Je cherche un stage à partir de septembre 2027. N'hésitez pas à me contacter.</p>
     <ul class="contact-list">
@@ -333,7 +387,7 @@
 </main>
 
 <footer>
-  <div class="wrap">© 2026 Camyl Khebache · Site statique, sans suivi</div>
+  <div class="wrap"><p class="trace-end" aria-hidden="true"><span class="ok">✔</span> traceroute terminé · 7 hops · destination atteinte en <i data-ms="33">33 ms</i></p>© 2026 Camyl Khebache · Site statique, sans suivi</div>
 </footer>
 </body>
 </html>
