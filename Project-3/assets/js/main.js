@@ -602,3 +602,28 @@
   }, { passive: true });
   update();
 })();
+
+// ---------- § 07 Contact : bouton « Copier » (adresse e-mail) ----------
+(function () {
+  var btn = document.querySelector('.copy-btn');
+  var addr = document.getElementById('mail-addr');
+  var status = document.querySelector('.copy-status');
+  if (!btn || !addr || !status) return;
+  var timer;
+  function done(msg) {
+    btn.textContent = msg === 'Copié' ? 'Copié' : 'Copier';
+    status.textContent = msg;
+    clearTimeout(timer);
+    timer = setTimeout(function () { btn.textContent = 'Copier'; status.textContent = ''; }, 2000);
+  }
+  function select() {
+    var r = document.createRange(); r.selectNodeContents(addr);
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+  }
+  btn.addEventListener('click', function () {
+    var text = addr.textContent.trim();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { done('Copié'); }, function () { select(); done('Copie impossible : adresse sélectionnée'); });
+    } else { select(); done('Copie impossible : adresse sélectionnée'); }
+  });
+})();

@@ -59,3 +59,8 @@
   .tl-halo { opacity: .35; transform: scale(1.1); }
   .tl-pk { display: none; }
 }
+
+/* téléphone / tablette : pas de colonne libre à droite, on retire le schéma de la frise */
+@media (max-width: 999px) {
+  .has-art > .tl-art:not(.ct-art) { display: none; }
+}

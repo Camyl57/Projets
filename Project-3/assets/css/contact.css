@@ -46,3 +46,10 @@
 @media (prefers-reduced-motion: reduce) {
   .btn.primary.cta-mail { animation: none; transition: none; }
 }
+
+/* ---------- § 07 : adresse en clair + bouton Copier ---------- */
+.mail-copy { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; }
+.mail-copy .mail-addr { color: var(--accent); overflow-wrap: anywhere; user-select: all; min-width: 0; }
+.mail-copy .copy-btn { padding: 8px 16px; cursor: pointer; }
+.mail-copy .copy-btn:focus-visible { outline: 3px solid var(--text); outline-offset: 3px; }
+.mail-copy .copy-status { flex-basis: 100%; min-height: 1.2em; font-size: 13px; color: var(--muted); }
