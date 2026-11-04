@@ -1,0 +1,44 @@
+/* Saut de hop : à chaque changement de section, des volets plein écran balaient la page
+   avec un gros « HOP 0N » (assets/js/jump.js). Décoratif : désactivé avec prefers-reduced-motion. */
+.jump { position: fixed; inset: 0; z-index: 140; pointer-events: none; display: flex; overflow: hidden; }
+.jp-col {
+  flex: 1; position: relative; transform: scaleY(0); transform-origin: 50% 0;
+  background:
+    linear-gradient(to right, transparent calc(100% - 2px), var(--accent) calc(100% - 2px)) ,
+    linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 100% 56px,
+    linear-gradient(180deg, var(--bg-2), var(--bg));
+  box-shadow: 0 0 40px -6px var(--glow);
+  animation: jpCol .7s cubic-bezier(.7, 0, .2, 1) both; animation-delay: calc(var(--i) * 30ms);
+}
+.jp-col:nth-child(even) { transform-origin: 50% 100%; animation-name: jpColUp; }
+@keyframes jpCol {
+  0% { transform: scaleY(0); transform-origin: 50% 0; } 42% { transform: scaleY(1); transform-origin: 50% 0; }
+  43% { transform-origin: 50% 100%; } 100% { transform: scaleY(0); transform-origin: 50% 100%; }
+}
+@keyframes jpColUp {
+  0% { transform: scaleY(0); transform-origin: 50% 100%; } 42% { transform: scaleY(1); transform-origin: 50% 100%; }
+  43% { transform-origin: 50% 0; } 100% { transform: scaleY(0); transform-origin: 50% 0; }
+}
+
+.jp-flash {
+  position: absolute; left: 0; right: 0; top: 50%; height: 5px; margin-top: -2px; transform: scaleX(0); opacity: 0;
+  background: linear-gradient(90deg, transparent, var(--accent), #fff 50%, var(--accent-2), transparent);
+  box-shadow: 0 0 40px 10px var(--glow); animation: jpFlash .7s cubic-bezier(.7, 0, .2, 1) both;
+}
+@keyframes jpFlash { 0%, 20% { transform: scaleX(0); opacity: 0; } 40% { transform: scaleX(1); opacity: 1; } 70% { transform: scaleX(1.1) scaleY(14); opacity: .6; } 100% { transform: scaleX(1.2) scaleY(0); opacity: 0; } }
+
+.jp-label {
+  position: absolute; inset: 0; display: grid; place-content: center; text-align: center; padding: 0 var(--gutter);
+  font-family: var(--mono); color: var(--text); animation: jpLabel .7s cubic-bezier(.2, .8, .2, 1) both;
+  text-shadow: 0 0 40px var(--glow);
+}
+.jp-label b { display: block; font-size: clamp(30px, 8.5vw, 120px); line-height: .95; font-weight: 600; letter-spacing: -.03em; color: var(--text); white-space: nowrap; }
+.jp-label b em { font-style: normal; color: var(--accent); }
+.jp-label span { display: block; margin-top: 14px; font-size: clamp(13px, 2.4vw, 22px); letter-spacing: .12em; color: var(--accent); }
+@keyframes jpLabel {
+  0%, 22% { opacity: 0; transform: scale(1.7) translateY(30px); filter: blur(14px); }
+  42%, 62% { opacity: 1; transform: scale(1); filter: blur(0); }
+  100% { opacity: 0; transform: scale(.6) translateY(-40px); filter: blur(10px); }
+}
+
+@media (prefers-reduced-motion: reduce) { .jump { display: none; } }
